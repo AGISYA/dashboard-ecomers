@@ -6,9 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "db:migrate": "prisma migrate dev --name init",
+    "seed:superadmin": "node scripts/seed-super-admin.mjs"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.2",
+    "@tanstack/react-query": "^5.90.20",
+    "@vercel/blob": "^2.2.0",
     "next": "16.1.6",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -18,8 +23,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "dotenv": "^17.2.4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "prisma": "^6.19.2",
     "tailwindcss": "^4",
     "typescript": "^5"
   }
