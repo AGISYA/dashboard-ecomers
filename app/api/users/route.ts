@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
       select: { id: true },
     });
     return NextResponse.json({ id: created.id });
-  } catch (e: any) {
+  } catch (e: unknown) {
     return NextResponse.json({ error: "Gagal membuat user" }, { status: 500 });
   }
 }

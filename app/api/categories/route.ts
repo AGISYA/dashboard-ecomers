@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     try {
       const created = await prisma.category.create({ data: { name, active } });
       return NextResponse.json({ id: created.id });
-    } catch (e: any) {
+    } catch {
       return NextResponse.json({ error: "Konflik nama" }, { status: 409 });
     }
   } catch {

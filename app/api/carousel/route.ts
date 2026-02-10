@@ -2,12 +2,9 @@ export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 
 export async function GET() {
-  const cfg = await prisma.carousel.findFirst({
-    select: { id: true, createdAt: true, imagesJson: true },
-  });
+  const cfg = await prisma.carousel.findFirst({ select: { id: true, createdAt: true } });
   if (!cfg) {
     return NextResponse.json({
       id: "",
@@ -15,18 +12,20 @@ export async function GET() {
       createdAt: new Date().toISOString(),
     });
   }
-  let raw: unknown = (cfg as any).imagesJson as unknown;
-  if (!Array.isArray(raw)) {
-    try {
-      const rows = (await prisma.$queryRawUnsafe<{ link?: string }[]>(
-        `SELECT "link" FROM "Carousel" WHERE "id" = $1 LIMIT 1`,
-        cfg.id
-      )) as { link?: string }[];
-      const s = rows?.[0]?.link ?? "";
-      raw = s ? JSON.parse(s) : null;
-    } catch {
-      raw = null;
+  let raw: unknown;
+  try {
+    const rows = await prisma.$queryRawUnsafe<{ imagesJson?: unknown; link?: string }[]>(
+      `SELECT "imagesJson","link" FROM "Carousel" WHERE "id" = $1 LIMIT 1`,
+      cfg.id
+    );
+    const v = rows?.[0]?.imagesJson ?? rows?.[0]?.link ?? null;
+    if (typeof v === "string") {
+      raw = v ? JSON.parse(v) : null;
+    } else {
+      raw = v as unknown;
     }
+  } catch {
+    raw = null;
   }
   const slides =
     Array.isArray(raw)
@@ -72,48 +71,29 @@ export async function POST(req: Request) {
     if (!slides.length || slides.some((s) => !s.imageUrl)) {
       return NextResponse.json({ error: "Slides tidak valid" }, { status: 400 });
     }
-    const exists = await prisma.carousel.findFirst();
-    if (!exists) {
-      try {
-        const created = await prisma.carousel.create({
-          data: {
-            imagesJson: slides as unknown as Prisma.InputJsonValue,
-          },
-        });
-        return NextResponse.json({ id: created.id });
-      } catch (err: any) {
-        const msg = String(err?.message || "");
-        if (msg.includes("Unknown argument `imagesJson`")) {
-          const created = await prisma.carousel.create({
-            data: { link: JSON.stringify(slides) },
-          });
-          return NextResponse.json({ id: created.id });
-        }
-        throw err;
-      }
+    const rows = await prisma.$queryRawUnsafe<{ id: string }[]>(
+      `SELECT "id" FROM "Carousel" LIMIT 1`
+    );
+    const firstImage = slides[0]?.imageUrl ?? "";
+    if (!rows?.[0]?.id) {
+      const created = await prisma.$queryRawUnsafe<{ id: string }[]>(
+        `INSERT INTO "Carousel"("link","imageUrl","sortOrder","active","createdAt","updatedAt") VALUES ($1,$2,0,true,NOW(),NOW()) RETURNING "id"`,
+        JSON.stringify(slides),
+        firstImage
+      );
+      return NextResponse.json({ id: created[0]?.id ?? "" });
     } else {
-      try {
-        const updated = await prisma.carousel.update({
-          where: { id: exists.id },
-          data: {
-            imagesJson: slides as unknown as Prisma.InputJsonValue,
-          },
-        });
-        return NextResponse.json({ id: updated.id });
-      } catch (err: any) {
-        const msg = String(err?.message || "");
-        if (msg.includes("Unknown argument `imagesJson`")) {
-          const u = await prisma.carousel.update({
-            where: { id: exists.id },
-            data: { link: JSON.stringify(slides) },
-          });
-          return NextResponse.json({ id: u.id });
-        }
-        throw err;
-      }
+      const id = rows[0].id;
+      await prisma.$executeRawUnsafe(
+        `UPDATE "Carousel" SET "link" = $1, "imageUrl" = $2, "updatedAt" = NOW() WHERE "id" = $3`,
+        JSON.stringify(slides),
+        firstImage,
+        id
+      );
+      return NextResponse.json({ id });
     }
-  } catch (e: any) {
-    const msg = typeof e?.message === "string" ? e.message : "Terjadi kesalahan";
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Terjadi kesalahan";
     return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

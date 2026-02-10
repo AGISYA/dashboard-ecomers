@@ -3,6 +3,7 @@ export const runtime = "nodejs";
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAuthTokenFromCookies, verifyJWT, scryptHash } from "@/lib/auth";
+import type { Prisma } from "@prisma/client";
 
 type Ctx = { params: Promise<{ id: string }> };
 
@@ -35,7 +36,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     active?: boolean;
     password?: string;
   };
-  const data: any = {};
+  const data: Prisma.UserUpdateInput = {};
   if (typeof body.name === "string") data.name = body.name.trim();
   if (typeof body.phone === "string") data.phone = body.phone.trim();
   if (typeof body.role === "string" && ["USER", "ADMIN", "SUPER_ADMIN"].includes(body.role)) {
