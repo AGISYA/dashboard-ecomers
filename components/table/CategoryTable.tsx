@@ -26,7 +26,7 @@ export default function CategoryTable({
   onDelete: (id: string) => void;
 }) {
   return (
-    <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+    <div className="rounded-md bg-card text-card-foreground shadow-md">
       <Table>
         <TableHeader>
           <TableRow>

@@ -20,7 +20,7 @@ export default function ProductTable({
   onDelete: (id: string) => void;
 }) {
   return (
-    <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+    <div className="rounded-md bg-card text-card-foreground shadow-md">
       <Table>
         <TableHeader>
           <TableRow>
@@ -35,7 +35,7 @@ export default function ProductTable({
           {items.map((p) => (
             <TableRow key={p.id}>
               <TableCell className="font-medium">{p.name}</TableCell>
-              <TableCell>{p.category?.name || "-"}</TableCell>
+              <TableCell>{p.categoryName || "-"}</TableCell>
               <TableCell>
                 {new Intl.NumberFormat("id-ID", {
                   style: "currency",

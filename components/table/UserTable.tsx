@@ -16,11 +16,11 @@ export type UserRow = {
 
 export default function UserTable({ items }: { items: UserRow[] }) {
   return (
-    <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+    <div className="rounded-md bg-card text-card-foreground shadow-md">
       <div className="w-full overflow-auto">
         <table className="w-full text-sm caption-bottom text-sm">
-          <thead className="[&_tr]:border-b">
-            <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+          <thead>
+            <tr className="transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
               <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">
                 Nama
               </th>
