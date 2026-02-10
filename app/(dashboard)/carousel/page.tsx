@@ -1,5 +1,5 @@
 "use client";
-import Topbar from "@/components/layout/Topbar";
+// import Topbar from "@/components/layout/Topbar";
 import { useCarousel, Slide } from "@/hooks/useCarousel";
 import { useUpdateCarousel } from "@/hooks/useUpdateCarousel";
 import { useEffect, useRef, useState, startTransition } from "react";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Plus, X, Save, Upload, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+// import { cn } from "@/lib/utils";
 
 export default function CarouselPage() {
   const { data, refetch, isLoading } = useCarousel();
