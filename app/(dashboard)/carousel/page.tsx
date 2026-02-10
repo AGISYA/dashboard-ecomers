@@ -7,7 +7,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
-import { Plus, Trash2, Save, Upload, Loader2 } from "lucide-react";
+import { Plus, X, Save, Upload, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function CarouselPage() {
@@ -65,7 +65,7 @@ export default function CarouselPage() {
 
   function updateSlide(index: number, field: keyof Slide, value: string) {
     setSlides((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
+      prev.map((s, i) => (i === index ? { ...s, [field]: value } : s)),
     );
   }
 
@@ -87,8 +87,12 @@ export default function CarouselPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Carousel Manager</h2>
-          <p className="text-muted-foreground mt-1">Manage your homepage hero slides.</p>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Carousel Manager
+          </h2>
+          <p className="text-muted-foreground mt-1">
+            Manage your homepage hero slides.
+          </p>
         </div>
         <div className="flex gap-2">
           <input
@@ -104,7 +108,11 @@ export default function CarouselPage() {
             Add Slide
           </Button>
           <Button onClick={saveConfig} disabled={isSaving || update.isPending}>
-            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {isSaving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="mr-2 h-4 w-4" />
+            )}
             Save Changes
           </Button>
         </div>
@@ -119,7 +127,11 @@ export default function CarouselPage() {
           <Upload className="h-10 w-10 mb-4 opacity-50" />
           <p className="text-lg font-medium">No slides active</p>
           <p className="text-sm">Upload an image to get started</p>
-          <Button onClick={() => fileRef.current?.click()} className="mt-4" variant="secondary">
+          <Button
+            onClick={() => fileRef.current?.click()}
+            className="mt-4"
+            variant="secondary"
+          >
             Upload Image
           </Button>
         </div>
@@ -141,7 +153,7 @@ export default function CarouselPage() {
                     className="h-8 w-8 shadow-sm opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={() => removeSlide(idx)}
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <X className="h-4 w-4" />
                   </Button>
                 </div>
                 <div className="absolute bottom-2 right-2 px-2 py-1 bg-black/50 text-white text-xs rounded backdrop-blur-sm">
@@ -150,28 +162,38 @@ export default function CarouselPage() {
               </div>
               <CardContent className="p-4 space-y-3">
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Title</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Title
+                  </label>
                   <Input
                     value={s.title}
-                    onChange={(e) => updateSlide(idx, 'title', e.target.value)}
+                    onChange={(e) => updateSlide(idx, "title", e.target.value)}
                     placeholder="Slide Title"
                     className="h-8"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Subtitle</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Subtitle
+                  </label>
                   <Input
                     value={s.subTitle}
-                    onChange={(e) => updateSlide(idx, 'subTitle', e.target.value)}
+                    onChange={(e) =>
+                      updateSlide(idx, "subTitle", e.target.value)
+                    }
                     placeholder="Slide Subtitle"
                     className="h-8"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-medium text-muted-foreground mb-1 block">Button Text</label>
+                  <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Button Text
+                  </label>
                   <Input
                     value={s.buttonText}
-                    onChange={(e) => updateSlide(idx, 'buttonText', e.target.value)}
+                    onChange={(e) =>
+                      updateSlide(idx, "buttonText", e.target.value)
+                    }
                     placeholder="CTA Button"
                     className="h-8"
                   />
