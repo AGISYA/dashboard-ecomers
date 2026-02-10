@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { verifyJWT } from "@/lib/auth";
 import Sidebar from "@/components/layout/Sidebar";
+import Header from "@/components/layout/Header";
 
 export default async function DashboardLayout({
   children,
@@ -16,9 +17,16 @@ export default async function DashboardLayout({
     redirect("/login");
   }
   return (
-    <div className="min-h-screen flex bg-white">
-      <Sidebar />
-      <main className="flex-1 bg-white">{children}</main>
+    <div className="h-full relative">
+      <div className="hidden h-full md:flex md:w-72 md:flex-col md:fixed md:inset-y-0 z-[80] bg-white border-r">
+        <Sidebar />
+      </div>
+      <main className="md:pl-72 bg-slate-50 min-h-screen">
+        <Header />
+        <div className="p-8">
+          {children}
+        </div>
+      </main>
     </div>
   );
 }

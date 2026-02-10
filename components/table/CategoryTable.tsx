@@ -1,45 +1,80 @@
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Edit, Trash2 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/Table";
+
+type CategoryItem = {
+  id: string;
+  name: string;
+  active: boolean;
+};
+
 export default function CategoryTable({
   items,
   onEdit,
   onDelete,
 }: {
-  items: { id: string; name: string; active: boolean }[];
+  items: CategoryItem[];
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }) {
   return (
-    <div className="card overflow-hidden">
-      <table className="w-full text-sm">
-        <thead className="bg-[#f8fafc]">
-          <tr className="text-left border-b">
-            <th className="p-3">Nama</th>
-            <th className="p-3">Aktif</th>
-            <th className="p-3">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nama Kategori</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {items.map((c) => (
-            <tr key={c.id} className="border-b hover:bg-[#f9fafb]">
-              <td className="p-3 font-medium">{c.name}</td>
-              <td className="p-3">{c.active ? "Ya" : "Tidak"}</td>
-              <td className="p-3">
-                <button
-                  onClick={() => onEdit(c.id)}
-                  className="btn btn-outline mr-2"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => onDelete(c.id)}
-                  className="btn btn-outline"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
+            <TableRow key={c.id}>
+              <TableCell className="font-medium">{c.name}</TableCell>
+              <TableCell>
+                <Badge variant={c.active ? "success" : "secondary"}>
+                  {c.active ? "Active" : "Inactive"}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    onClick={() => onEdit(c.id)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive"
+                    onClick={() => onDelete(c.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+          {items.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={3} className="text-center h-24">
+                No categories found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

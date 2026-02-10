@@ -50,10 +50,9 @@ model Product {
 model Carousel {
   id        String   @id @default(cuid())
   title     String   @default("")
-  imageUrl  String
-  link      String   @default("")
-  sortOrder Int      @default(0)
-  active    Boolean  @default(true)
+  subTitle  String   @default("")
+  buttonText String  @default("")
+  imagesJson Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

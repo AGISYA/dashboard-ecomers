@@ -5,6 +5,7 @@ import { useCategories } from "@/hooks/useCategories";
 import { useDeleteCategory } from "@/hooks/useDeleteCategory";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 
 export default function CategoriesPage() {
   const { data, refetch } = useCategories();
@@ -17,14 +18,19 @@ export default function CategoriesPage() {
     del.mutate(id, { onSuccess: () => refetch() });
   }
   return (
-    <div>
-      <Topbar title="Kategori" />
-      <div className="container px-6 py-6 space-y-4">
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <Link href="/categories/new" className="btn btn-primary">+ Kategori Baru</Link>
+          <h2 className="text-3xl font-bold tracking-tight">Categories</h2>
+          <p className="text-muted-foreground mt-1">
+            Manage product categories.
+          </p>
         </div>
-        <CategoryTable items={(data ?? []).map(c => ({ id: c.id, name: c.name, active: c.active }))} onEdit={onEdit} onDelete={onDelete} />
+        <Link href="/categories/new">
+          <Button>+ New Category</Button>
+        </Link>
       </div>
+      <CategoryTable items={(data ?? []).map(c => ({ id: c.id, name: c.name, active: c.active }))} onEdit={onEdit} onDelete={onDelete} />
     </div>
   );
 }

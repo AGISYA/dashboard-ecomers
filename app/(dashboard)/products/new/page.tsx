@@ -7,6 +7,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
 
 export default function NewProductPage() {
   const { data: cats } = useCategories();
@@ -64,11 +65,11 @@ export default function NewProductPage() {
       <div className="p-4 space-y-4 max-w-2xl">
         {error && <div className="text-sm text-red-600">{error}</div>}
         <div>
-          <label className="block text-sm mb-1">Nama</label>
-          <input
-            className="border rounded px-3 py-2 w-full"
+          <label className="block text-sm font-medium mb-1">Nama</label>
+          <Input
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder="Nama produk"
           />
         </div>
         <div>
@@ -87,10 +88,9 @@ export default function NewProductPage() {
           </select>
         </div>
         <div>
-          <label className="block text-sm mb-1">Harga</label>
-          <input
+          <label className="block text-sm font-medium mb-1">Harga</label>
+          <Input
             type="text"
-            className="border rounded px-3 py-2 w-full"
             value={priceText}
             onChange={(e) => {
               const raw = e.target.value;
@@ -99,8 +99,8 @@ export default function NewProductPage() {
               setPrice(num);
               const formatted = digits
                 ? digits
-                    .replace(/^0+/, "")
-                    .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                  .replace(/^0+/, "")
+                  .replace(/\B(?=(\d{3})+(?!\d))/g, ".")
                 : "";
               setPriceText(formatted);
             }}
@@ -108,8 +108,8 @@ export default function NewProductPage() {
           />
         </div>
         <div>
-          <label className="block text-sm mb-1">Gambar</label>
-          <input
+          <label className="block text-sm font-medium mb-1">Gambar</label>
+          <Input
             ref={fileRef}
             type="file"
             accept="image/*"

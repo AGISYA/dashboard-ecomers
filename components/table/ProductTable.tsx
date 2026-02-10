@@ -1,5 +1,16 @@
 import Link from "next/link";
 import { ProductListItem } from "@/hooks/useProducts";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { Edit, Trash2 } from "lucide-react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/Table";
 
 export default function ProductTable({
   items,
@@ -9,42 +20,61 @@ export default function ProductTable({
   onDelete: (id: string) => void;
 }) {
   return (
-    <div className="card overflow-hidden">
-      <table className="w-full text-sm">
-        <thead className="bg-[#f8fafc]">
-          <tr className="text-left border-b">
-            <th className="p-3">Nama</th>
-            <th className="p-3">Kategori</th>
-            <th className="p-3">Harga</th>
-            <th className="p-3">Aktif</th>
-            <th className="p-3">Aksi</th>
-          </tr>
-        </thead>
-        <tbody>
+    <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Nama</TableHead>
+            <TableHead>Kategori</TableHead>
+            <TableHead>Harga</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {items.map((p) => (
-            <tr key={p.id} className="border-b hover:bg-[#f9fafb]">
-              <td className="p-3 font-medium">{p.name}</td>
-              <td className="p-3">{p.categoryName}</td>
-              <td className="p-3">{p.price}</td>
-              <td className="p-3">{p.active ? "Ya" : "Tidak"}</td>
-              <td className="p-3">
-                <Link
-                  href={`/products/${p.id}/edit`}
-                  className="btn btn-outline mr-2"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={() => onDelete(p.id)}
-                  className="btn btn-outline"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
+            <TableRow key={p.id}>
+              <TableCell className="font-medium">{p.name}</TableCell>
+              <TableCell>{p.category?.name || "-"}</TableCell>
+              <TableCell>
+                {new Intl.NumberFormat("id-ID", {
+                  style: "currency",
+                  currency: "IDR",
+                }).format(Number(p.price))}
+              </TableCell>
+              <TableCell>
+                <Badge variant={p.active ? "success" : "secondary"}>
+                  {p.active ? "Active" : "Inactive"}
+                </Badge>
+              </TableCell>
+              <TableCell className="text-right">
+                <div className="flex justify-end gap-2">
+                  <Link href={`/products/${p.id}/edit`}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-destructive"
+                    onClick={() => onDelete(p.id)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+          {items.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={5} className="text-center h-24">
+                No products found.
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </div>
   );
 }

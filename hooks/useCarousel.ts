@@ -1,17 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 
-export type CarouselItem = {
-  id: string;
-  title: string;
+export type Slide = {
   imageUrl: string;
-  link: string;
-  sortOrder: number;
-  active: boolean;
+  title: string;
+  subTitle: string;
+  buttonText: string;
+};
+
+export type CarouselConfig = {
+  id: string;
+  slides: Slide[];
   createdAt: string;
 };
 
 export function useCarousel() {
-  return useQuery<CarouselItem[]>({
+  return useQuery<CarouselConfig>({
     queryKey: ["carousel"],
     queryFn: async () => {
       const res = await fetch("/api/carousel");

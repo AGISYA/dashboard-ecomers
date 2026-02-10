@@ -4,11 +4,12 @@ export function useUpdateCarousel() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (payload: {
-      imageUrl: string;
-      title?: string;
-      link?: string;
-      sortOrder?: number;
-      active?: boolean;
+      slides: {
+        imageUrl: string;
+        title: string;
+        subTitle: string;
+        buttonText: string;
+      }[];
     }) => {
       const res = await fetch("/api/carousel", {
         method: "POST",
