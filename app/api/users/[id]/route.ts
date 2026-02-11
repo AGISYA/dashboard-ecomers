@@ -16,7 +16,7 @@ export async function GET(_: NextRequest, { params }: Ctx) {
   const { id } = await params;
   const u = await prisma.user.findUnique({
     where: { id },
-    select: { id: true, name: true, phone: true, role: true, active: true, createdAt: true, updatedAt: true },
+    select: { id: true, name: true, phone: true, email: true, role: true, active: true, createdAt: true, updatedAt: true },
   });
   if (!u) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json(u);
@@ -32,6 +32,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const body = (await req.json()) as {
     name?: string;
     phone?: string;
+    email?: string;
     role?: "USER" | "ADMIN" | "SUPER_ADMIN";
     active?: boolean;
     password?: string;
@@ -39,6 +40,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   const data: Prisma.UserUpdateInput = {};
   if (typeof body.name === "string") data.name = body.name.trim();
   if (typeof body.phone === "string") data.phone = body.phone.trim();
+  if (typeof body.email === "string") data.email = body.email.trim();
   if (typeof body.role === "string" && ["USER", "ADMIN", "SUPER_ADMIN"].includes(body.role)) {
     data.role = body.role;
   }

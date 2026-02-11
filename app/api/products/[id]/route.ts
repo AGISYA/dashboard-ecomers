@@ -13,21 +13,40 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_: NextRequest, { params }: Ctx) {
   const { id } = await params;
-  const p = await prisma.product.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      name: true,
-      categoryId: true,
-      price: true,
-      imageUrl: true,
-      imagesJson: true,
-      active: true,
-      description: true,
-      createdAt: true,
-      category: { select: { name: true } },
-    },
-  });
+  const roomExistsRows = await prisma.$queryRawUnsafe<{ exists: boolean }[]>(
+    `SELECT EXISTS (SELECT 1 FROM pg_class WHERE relname = 'Room' AND relkind = 'r') AS exists`
+  );
+  const hasRoom = Boolean(roomExistsRows?.[0]?.exists);
+  const rows = await prisma.$queryRawUnsafe<
+    {
+      id: string;
+      name: string;
+      categoryId: string;
+      roomId: string | null;
+      price: bigint;
+      imageUrl: string | null;
+      imagesJson: unknown;
+      active: boolean;
+      description: string;
+      createdAt: Date;
+      categoryName: string | null;
+      roomName: string | null;
+    }[]
+  >(
+    `
+    SELECT p."id", p."name", p."categoryId", p."roomId",
+           p."price", p."imageUrl", p."imagesJson", p."active", p."description", p."createdAt",
+           c."name" AS "categoryName",
+           ${hasRoom ? `r."name"` : `NULL::text`} AS "roomName"
+    FROM "Product" p
+    LEFT JOIN "Category" c ON p."categoryId" = c."id"
+    ${hasRoom ? `LEFT JOIN "Room" r ON p."roomId" = r."id"` : ``}
+    WHERE p."id" = $1
+    LIMIT 1
+    `,
+    id
+  );
+  const p = rows?.[0];
   if (!p) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -36,8 +55,10 @@ export async function GET(_: NextRequest, { params }: Ctx) {
   return NextResponse.json({
     id: p.id,
     name: p.name,
-    categoryName: p.category?.name ?? "",
+    categoryName: p.categoryName ?? "",
     categoryId: p.categoryId,
+    roomName: p.roomName ?? "",
+    roomId: p.roomId ?? null,
     price: toNumber(p.price),
     imageUrl: p.imageUrl ?? null,
     images: imagesArr,
@@ -55,6 +76,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     imageUrl?: string | null;
     active?: boolean;
     categoryId?: string;
+    roomId?: string;
     imageUrls?: unknown;
     price?: number;
   };
@@ -65,6 +87,9 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
   if (typeof body.active === "boolean") updateData.active = body.active;
   if (typeof body.categoryId === "string") {
     updateData.category = { connect: { id: body.categoryId } };
+  }
+  if (typeof body.roomId === "string") {
+    (updateData as Record<string, unknown>).roomId = body.roomId;
   }
   const imageUrls: string[] | undefined = Array.isArray(body.imageUrls)
     ? (body.imageUrls as unknown[]).map((s) => String(s))

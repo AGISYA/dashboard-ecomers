@@ -4,28 +4,21 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-  const cfg = await prisma.carousel.findFirst({ select: { id: true, createdAt: true } });
-  if (!cfg) {
-    return NextResponse.json({
-      id: "",
-      slides: [],
-      createdAt: new Date().toISOString(),
-    });
+  const rows = await prisma.$queryRawUnsafe<{ id: string; createdAt: Date; imagesJson: unknown }[]>(
+    `SELECT "id","createdAt","imagesJson" FROM "Carousel" LIMIT 1`
+  );
+  const row = rows?.[0];
+  if (!row) {
+    return NextResponse.json({ id: "", slides: [], createdAt: new Date().toISOString() });
   }
-  let raw: unknown;
-  try {
-    const rows = await prisma.$queryRawUnsafe<{ imagesJson?: unknown; link?: string }[]>(
-      `SELECT "imagesJson","link" FROM "Carousel" WHERE "id" = $1 LIMIT 1`,
-      cfg.id
-    );
-    const v = rows?.[0]?.imagesJson ?? rows?.[0]?.link ?? null;
-    if (typeof v === "string") {
+  const v = row.imagesJson;
+  let raw: unknown = v;
+  if (typeof v === "string") {
+    try {
       raw = v ? JSON.parse(v) : null;
-    } else {
-      raw = v as unknown;
+    } catch {
+      raw = null;
     }
-  } catch {
-    raw = null;
   }
   const slides =
     Array.isArray(raw)
@@ -40,9 +33,9 @@ export async function GET() {
       })
       : [];
   return NextResponse.json({
-    id: cfg.id,
+    id: row.id,
     slides,
-    createdAt: cfg.createdAt.toISOString(),
+    createdAt: row.createdAt.toISOString(),
   });
 }
 
@@ -71,23 +64,18 @@ export async function POST(req: Request) {
     if (!slides.length || slides.some((s) => !s.imageUrl)) {
       return NextResponse.json({ error: "Slides tidak valid" }, { status: 400 });
     }
-    const rows = await prisma.$queryRawUnsafe<{ id: string }[]>(
-      `SELECT "id" FROM "Carousel" LIMIT 1`
-    );
-    const firstImage = slides[0]?.imageUrl ?? "";
+    const rows = await prisma.$queryRawUnsafe<{ id: string }[]>(`SELECT "id" FROM "Carousel" LIMIT 1`);
     if (!rows?.[0]?.id) {
       const created = await prisma.$queryRawUnsafe<{ id: string }[]>(
-        `INSERT INTO "Carousel"("link","imageUrl","sortOrder","active","createdAt","updatedAt") VALUES ($1,$2,0,true,NOW(),NOW()) RETURNING "id"`,
-        JSON.stringify(slides),
-        firstImage
+        `INSERT INTO "Carousel"("imagesJson","createdAt","updatedAt") VALUES ($1::jsonb,NOW(),NOW()) RETURNING "id"`,
+        JSON.stringify(slides)
       );
       return NextResponse.json({ id: created[0]?.id ?? "" });
     } else {
       const id = rows[0].id;
       await prisma.$executeRawUnsafe(
-        `UPDATE "Carousel" SET "link" = $1, "imageUrl" = $2, "updatedAt" = NOW() WHERE "id" = $3`,
+        `UPDATE "Carousel" SET "imagesJson" = $1::jsonb, "updatedAt" = NOW() WHERE "id" = $2`,
         JSON.stringify(slides),
-        firstImage,
         id
       );
       return NextResponse.json({ id });

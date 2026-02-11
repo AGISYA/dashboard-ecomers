@@ -4,6 +4,7 @@ export type ProductListItem = {
   id: string;
   name: string;
   categoryName: string;
+  roomName: string;
   price: number;
   imageUrl: string | null;
   active: boolean;
@@ -16,12 +17,14 @@ export function useProducts(params: {
   limit?: number;
   q?: string;
   category?: string;
+  room?: string;
 }) {
   const q = new URLSearchParams();
   if (params.page) q.set("page", String(params.page));
   if (params.limit) q.set("limit", String(params.limit));
   if (params.q) q.set("q", params.q);
   if (params.category) q.set("category", params.category);
+  if (params.room) q.set("room", params.room);
   const key = ["products", params];
   return useQuery<{ data: ProductListItem[]; page: number; limit: number; total: number }>({
     queryKey: key,

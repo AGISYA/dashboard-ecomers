@@ -1,7 +1,8 @@
 "use client";
-import Topbar from "@/components/layout/Topbar";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useUsers } from "@/hooks/useUsers";
+import { useAuth } from "@/hooks/useAuth";
 import {
   Table,
   TableBody,
@@ -17,38 +18,28 @@ import { Edit, Trash2, Save, X, Plus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 
 export default function UsersPage() {
-  const { data, refetch } = useUsers();
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [active, setActive] = useState(true);
+  const { data: me } = useAuth();
+  const isAdmin = me?.role === "ADMIN" || me?.role === "SUPER_ADMIN";
+  const { data, refetch } = useUsers({ enabled: !!isAdmin });
+  const router = useRouter();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPassword, setEditPassword] = useState("");
   const [editActive, setEditActive] = useState(true);
-
-  async function createUser() {
-    const res = await fetch("/api/users", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, phone, active, role: "USER" }),
-    });
-    if (res.ok) {
-      setName("");
-      setPhone("");
-      setActive(true);
-      refetch();
-    }
-  }
 
   async function startEdit(u: {
     id: string;
     name: string;
-    phone: string;
+    phone?: string | null;
+    email?: string | null;
     active: boolean;
   }) {
     setEditingId(u.id);
     setEditName(u.name);
-    setEditPhone(u.phone);
+    setEditPhone(u.phone || "");
+    setEditEmail(u.email || "");
     setEditActive(u.active);
   }
 
@@ -60,11 +51,14 @@ export default function UsersPage() {
       body: JSON.stringify({
         name: editName,
         phone: editPhone,
+        email: editEmail || undefined,
+        password: editPassword || undefined,
         active: editActive,
       }),
     });
     if (res.ok) {
       setEditingId(null);
+      setEditPassword("");
       refetch();
     }
   }
@@ -74,62 +68,39 @@ export default function UsersPage() {
     if (res.ok) refetch();
   }
 
+  if (!isAdmin) {
+    return (
+      <div className="space-y-6">
+        <div className="rounded-md bg-card text-card-foreground shadow-md p-6">
+          <p className="text-sm">
+            Halaman ini hanya untuk ADMIN. Silakan login sebagai admin.
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Users</h2>
-        <p className="text-muted-foreground mt-1">
-          Manage registered users (Customers).
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Users</h2>
+          <p className="text-muted-foreground mt-1">
+            Manage registered users (Customers).
+          </p>
+        </div>
+        <Button onClick={() => router.push("/users/new")}>
+          <Plus className="mr-2 h-4 w-4" />
+          Create User
+        </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Add New User</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Name</label>
-              <Input
-                placeholder="Full Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium mb-1 block">Phone</label>
-              <Input
-                placeholder="Phone Number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-              />
-            </div>
-            <div className="flex items-center h-10">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={active}
-                  onChange={(e) => setActive(e.target.checked)}
-                  className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                />
-                <span className="text-sm">Active Status</span>
-              </label>
-            </div>
-            <Button onClick={createUser}>
-              <Plus className="mr-2 h-4 w-4" />
-              Create User
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="rounded-md border bg-card text-card-foreground shadow-sm">
+      <div className="rounded-md bg-card text-card-foreground shadow-md">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>User</TableHead>
               <TableHead>Phone</TableHead>
+              <TableHead>Email</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -163,19 +134,43 @@ export default function UsersPage() {
                         className="h-8"
                       />
                     ) : (
-                      <span className="font-mono text-xs">{u.phone}</span>
+                      <span className="font-mono text-xs">
+                        {u.phone ?? "-"}
+                      </span>
                     )}
                   </TableCell>
                   <TableCell>
                     {editingId === u.id ? (
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={editActive}
-                          onChange={(e) => setEditActive(e.target.checked)}
+                      <Input
+                        value={editEmail}
+                        onChange={(e) => setEditEmail(e.target.value)}
+                        className="h-8"
+                      />
+                    ) : (
+                      <span className="font-mono text-xs">
+                        {u.email || "-"}
+                      </span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {editingId === u.id ? (
+                      <div className="flex items-center gap-2">
+                        <label className="flex items-center gap-2">
+                          <input
+                            type="checkbox"
+                            checked={editActive}
+                            onChange={(e) => setEditActive(e.target.checked)}
+                          />
+                          <span className="text-sm">Active</span>
+                        </label>
+                        <Input
+                          type="password"
+                          placeholder="New Password"
+                          value={editPassword}
+                          onChange={(e) => setEditPassword(e.target.value)}
+                          className="h-8"
                         />
-                        <span className="text-sm">Active</span>
-                      </label>
+                      </div>
                     ) : (
                       <Badge variant={u.active ? "success" : "secondary"}>
                         {u.active ? "Active" : "Inactive"}

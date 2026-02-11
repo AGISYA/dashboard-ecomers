@@ -34,11 +34,11 @@ export default function UserTable({ items }: { items: UserRow[] }) {
               </th>
             </tr>
           </thead>
-          <tbody className="[&_tr:last-child]:border-0">
+          <tbody>
             {items.map((u) => (
               <tr
                 key={u.id}
-                className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
+                className="transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted"
               >
                 <td className="p-4 align-middle [&:has([role=checkbox])]:pr-0 font-medium">
                   <div className="flex items-center gap-3">

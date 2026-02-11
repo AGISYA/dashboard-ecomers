@@ -8,7 +8,8 @@ const AUTH_MAX_AGE = 7 * 24 * 60 * 60;
 type JwtPayload = {
   id: string;
   name: string;
-  phone: string;
+  phone?: string;
+  email?: string;
   role: "USER" | "ADMIN" | "SUPER_ADMIN";
 };
 

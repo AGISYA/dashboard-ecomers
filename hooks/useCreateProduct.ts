@@ -8,6 +8,7 @@ export function useCreateProduct() {
       description?: string;
       price: number;
       categoryId: string;
+      roomId?: string;
       imageUrl?: string | null;
       imageUrls?: string[];
       active?: boolean;

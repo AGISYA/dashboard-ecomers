@@ -10,9 +10,20 @@ export async function GET(_: NextRequest) {
   if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
+  const emailColExistsRows = await prisma.$queryRawUnsafe<{ exists: boolean }[]>(
+    `SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'User' AND column_name = 'email') AS exists`
+  );
+  const hasEmail = Boolean(emailColExistsRows?.[0]?.exists);
   const users = await prisma.user.findMany({
     orderBy: { createdAt: "desc" },
-    select: { id: true, name: true, phone: true, role: true, active: true },
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      role: true,
+      active: true,
+      ...(hasEmail ? { email: true } : {}),
+    },
   });
   return NextResponse.json(users);
 }
@@ -20,32 +31,48 @@ export async function GET(_: NextRequest) {
 export async function POST(req: NextRequest) {
   const token = await getAuthTokenFromCookies();
   const me = token ? verifyJWT(token) : null;
+  let bootstrapAdmin = false;
   if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    const adminCount = await prisma.user.count({
+      where: { OR: [{ role: "ADMIN" }, { role: "SUPER_ADMIN" }] },
+    });
+    if (adminCount > 0) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+    bootstrapAdmin = true;
   }
   try {
     const body = (await req.json()) as {
       name?: string;
       phone?: string;
+      email?: string;
       role?: "USER" | "ADMIN" | "SUPER_ADMIN";
       active?: boolean;
       password?: string;
     };
     const name = String(body.name ?? "").trim();
     const phone = String(body.phone ?? "").trim();
-    const role = (body.role ?? "USER") as "USER" | "ADMIN" | "SUPER_ADMIN";
+    const email = String(body.email ?? "").trim();
+    const requestedRole = (body.role ?? "USER") as "USER" | "ADMIN" | "SUPER_ADMIN";
+    const role = bootstrapAdmin ? "SUPER_ADMIN" : requestedRole;
     const active = body.active ?? true;
     const password = body.password ? String(body.password) : undefined;
-    if (!name || !phone || !["USER", "ADMIN", "SUPER_ADMIN"].includes(role)) {
+    if (!name || (!phone && !email) || !["USER", "ADMIN", "SUPER_ADMIN"].includes(role)) {
       return NextResponse.json({ error: "Input tidak valid" }, { status: 400 });
     }
+    const emailColExistsRows2 = await prisma.$queryRawUnsafe<{ exists: boolean }[]>(
+      `SELECT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name = 'User' AND column_name = 'email') AS exists`
+    );
+    const hasEmail2 = Boolean(emailColExistsRows2?.[0]?.exists);
+    const hashed = password ? await (await import("@/lib/auth")).scryptHash(password) : undefined;
     const created = await prisma.user.create({
       data: {
         name,
-        phone,
+        ...(phone ? { phone } : {}),
+        ...(email && hasEmail2 ? { email } : {}),
         role,
         active,
-        password: password ? await (await import("@/lib/auth")).scryptHash(password) : undefined,
+        password: hashed,
       },
       select: { id: true },
     });

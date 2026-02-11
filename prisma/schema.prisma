@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 enum Role {
@@ -16,7 +17,8 @@ enum Role {
 model User {
   id        String   @id @default(cuid())
   name      String
-  phone     String   @unique
+  phone     String?  @unique
+  email     String?  @unique
   password  String?
   role      Role     @default(USER)
   active    Boolean  @default(true)
@@ -43,6 +45,8 @@ model Product {
   active      Boolean   @default(true)
   categoryId  String
   category    Category  @relation(fields: [categoryId], references: [id])
+  roomId      String?
+  room        Room?     @relation(fields: [roomId], references: [id])
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 }
@@ -55,4 +59,13 @@ model Carousel {
   imagesJson Json?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Room {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
 }

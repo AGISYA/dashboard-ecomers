@@ -1,5 +1,4 @@
 "use client";
-import Topbar from "@/components/layout/Topbar";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import { useUpdateCategory } from "@/hooks/useUpdateCategory";
 import { useEffect, useState } from "react";
@@ -29,9 +28,7 @@ export default function EditCategoryPage() {
   }
 
   return (
-    <div>
-      <Topbar title="Edit Kategori" />
-      <div className="p-4 space-y-4 max-w-md">
+    <div className="p-4 space-y-4 max-w-md">
         <div>
           <label className="block text-sm mb-1">Nama</label>
           <input className="border rounded px-3 py-2 w-full" value={name} onChange={(e) => setName(e.target.value)} />
@@ -45,7 +42,6 @@ export default function EditCategoryPage() {
           onConfirm={onConfirm}
           trigger={<button className="px-3 py-2 bg-black text-white rounded">Simpan</button>}
         />
-      </div>
     </div>
   );
 }

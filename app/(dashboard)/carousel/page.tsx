@@ -27,21 +27,28 @@ export default function CarouselPage() {
 
   async function handleUploadFiles(files?: FileList | null) {
     if (!files || files.length === 0) return;
+    if (typeof navigator !== "undefined" && navigator.onLine === false) {
+      return;
+    }
     const uploaded: string[] = [];
     // Show loading state or toast ideally, for now just await
     for (const file of Array.from(files)) {
       const fd = new FormData();
       fd.set("file", file);
-      const res = await fetch("/api/upload/image", {
-        method: "POST",
-        body: fd,
-      });
-      const j = await res.json();
-      if (res.ok) {
-        const url = String(j.publicUrl || "")
-          .trim()
-          .replace(/[)\s]+$/g, "");
-        uploaded.push(url);
+      try {
+        const res = await fetch("/api/upload/image", {
+          method: "POST",
+          body: fd,
+        });
+        const j = await res.json().catch(() => ({}));
+        if (res.ok) {
+          const url = String(j.publicUrl || "")
+            .trim()
+            .replace(/[)\\s]+$/g, "");
+          uploaded.push(url);
+        }
+      } catch {
+        break;
       }
     }
     if (uploaded.length) {

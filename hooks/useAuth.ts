@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 export type Me = {
   id: string;
   name: string;
-  phone: string;
+  phone?: string | null;
+  email?: string;
   role: "USER" | "ADMIN" | "SUPER_ADMIN";
 };
 
