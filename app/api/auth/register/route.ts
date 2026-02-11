@@ -46,19 +46,15 @@ export async function POST(req: Request) {
       role: "USER",
     });
     const resp = NextResponse.json(created);
-    resp.cookies.set(
-      "auth_token",
-      token,
-      {
-        httpOnly: true,
-        sameSite: "lax",
-        secure:
-          process.env.NODE_ENV !== "development" &&
-          process.env.NODE_ENV !== "test",
-        path: "/",
-        maxAge: 7 * 24 * 60 * 60,
-      }
-    );
+    resp.cookies.set("shop_auth", token, {
+      httpOnly: true,
+      sameSite: "lax",
+      secure:
+        process.env.NODE_ENV !== "development" &&
+        process.env.NODE_ENV !== "test",
+      path: "/shop",
+      maxAge: 7 * 24 * 60 * 60,
+    });
     return resp;
   } catch {
     return NextResponse.json({ error: "Terjadi kesalahan" }, { status: 500 });

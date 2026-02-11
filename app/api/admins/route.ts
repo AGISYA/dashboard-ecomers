@@ -2,10 +2,10 @@ export const runtime = "nodejs";
 
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
+import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
-  const token = await getAuthTokenFromCookies();
+  const token = await getAdminAuthTokenFromCookies();
   const me = token ? verifyJWT(token) : null;
   const adminCount = await prisma.user.count({
     where: { OR: [{ role: "ADMIN" }, { role: "SUPER_ADMIN" }] },

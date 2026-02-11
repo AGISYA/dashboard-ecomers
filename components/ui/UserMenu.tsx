@@ -34,8 +34,17 @@ export default function UserMenu() {
   }, []);
 
   async function logout() {
-    await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/login";
+    const path = typeof window !== "undefined" ? window.location.pathname : "";
+    const isAdminArea = [
+      "/dashboard",
+      "/products",
+      "/categories",
+      "/carousel",
+      "/users",
+    ].some((p) => path.startsWith(p));
+    const endpoint = isAdminArea ? "/api/auth/logout" : "/api/shop/auth/logout";
+    await fetch(endpoint, { method: "POST" });
+    window.location.href = isAdminArea ? "/login" : "/shop";
   }
 
   const initial = (me?.name || me?.phone || "A").charAt(0).toUpperCase();
@@ -56,10 +65,16 @@ export default function UserMenu() {
             <div className="text-muted">{me?.phone || ""}</div>
           </div>
           <div className="border-t my-1" />
-          <Link className="block px-3 py-2 hover:bg-[#f1f5f9] rounded-lg" href="/profile">
+          <Link
+            className="block px-3 py-2 hover:bg-[#f1f5f9] rounded-lg"
+            href="/profile"
+          >
             Profil
           </Link>
-          <button className="block w-full text-left px-3 py-2 hover:bg-[#f1f5f9] rounded-lg" onClick={logout}>
+          <button
+            className="block w-full text-left px-3 py-2 hover:bg-[#f1f5f9] rounded-lg"
+            onClick={logout}
+          >
             Logout
           </button>
         </div>

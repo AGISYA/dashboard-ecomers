@@ -2,10 +2,10 @@ export const runtime = "nodejs";
 
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
+import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function GET(_: NextRequest) {
-  const token = await getAuthTokenFromCookies();
+  const token = await getAdminAuthTokenFromCookies();
   const me = token ? verifyJWT(token) : null;
   if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -29,7 +29,7 @@ export async function GET(_: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const token = await getAuthTokenFromCookies();
+  const token = await getAdminAuthTokenFromCookies();
   const me = token ? verifyJWT(token) : null;
   let bootstrapAdmin = false;
   if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {

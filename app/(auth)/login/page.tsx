@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const [phone, setPhone] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -11,10 +11,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     (async () => {
-      const res = await fetch("/api/auth/me");
-      if (res.ok) {
-        router.replace("/dashboard");
-      }
+      const res = await fetch("/api/auth/me", { credentials: "include" });
+      const data = await res.json().catch(() => null);
+      if (data && data.id) router.replace("/dashboard");
     })();
   }, [router]);
 
@@ -25,7 +24,7 @@ export default function LoginPage() {
     const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone, password }),
+      body: JSON.stringify({ identifier, password }),
     });
     setLoading(false);
     if (!res.ok) {
@@ -38,19 +37,18 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
-      <form
-        onSubmit={onSubmit}
-        className="card w-full max-w-sm p-6 space-y-5"
-      >
+      <form onSubmit={onSubmit} className="card w-full max-w-sm p-6 space-y-5">
         <h1 className="text-2xl font-semibold tracking-tight">Masuk</h1>
         {error && <div className="text-sm text-red-600">{error}</div>}
         <div>
-          <label className="block text-sm mb-1 text-muted">Phone</label>
+          <label className="block text-sm mb-1 text-muted">
+            Email atau Phone
+          </label>
           <input
             className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#0ea5e9]"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="08xxxxxxxxxx"
+            value={identifier}
+            onChange={(e) => setIdentifier(e.target.value)}
+            placeholder="contoh: 08xxxxxxxxxx atau user@mail.com"
           />
         </div>
         <div>
@@ -63,9 +61,19 @@ export default function LoginPage() {
             placeholder="••••••••"
           />
         </div>
-        <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+        <button
+          className="btn btn-primary w-full"
+          type="submit"
+          disabled={loading}
+        >
           {loading ? "Memproses..." : "Masuk"}
         </button>
+        <div className="text-sm text-muted-foreground">
+          Belum punya akun?{" "}
+          <a className="underline" href="/register">
+            Daftar
+          </a>
+        </div>
       </form>
     </div>
   );

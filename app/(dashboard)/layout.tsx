@@ -11,7 +11,7 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const c = await cookies();
-  const token = c.get("auth_token")?.value || "";
+  const token = c.get("admin_token")?.value || "";
   const payload = token ? verifyJWT(token) : null;
   if (!payload) {
     redirect("/login");

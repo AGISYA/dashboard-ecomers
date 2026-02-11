@@ -2,13 +2,13 @@ export const runtime = "nodejs";
 
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthTokenFromCookies, verifyJWT, scryptHash } from "@/lib/auth";
+import { getAdminAuthTokenFromCookies, verifyJWT, scryptHash } from "@/lib/auth";
 import type { Prisma } from "@prisma/client";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_: NextRequest, { params }: Ctx) {
-  const token = await getAuthTokenFromCookies();
+  const token = await getAdminAuthTokenFromCookies();
   const me = token ? verifyJWT(token) : null;
   if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -23,7 +23,7 @@ export async function GET(_: NextRequest, { params }: Ctx) {
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const token = await getAuthTokenFromCookies();
+  const token = await getAdminAuthTokenFromCookies();
   const me = token ? verifyJWT(token) : null;
   if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -61,7 +61,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(_: NextRequest, { params }: Ctx) {
-  const token = await getAuthTokenFromCookies();
+  const token = await getAdminAuthTokenFromCookies();
   const me = token ? verifyJWT(token) : null;
   if (!me || (me.role !== "ADMIN" && me.role !== "SUPER_ADMIN")) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

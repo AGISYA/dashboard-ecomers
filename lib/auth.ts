@@ -2,7 +2,8 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import crypto from "node:crypto";
 
-const AUTH_COOKIE = "auth_token";
+const ADMIN_COOKIE = "admin_token";
+const SHOP_COOKIE = "shop_auth";
 const AUTH_MAX_AGE = 7 * 24 * 60 * 60;
 
 type JwtPayload = {
@@ -83,10 +84,10 @@ export async function scryptVerify(password: string, stored: string) {
   return match;
 }
 
-export async function setAuthCookie(token: string) {
+export async function setAdminAuthCookie(token: string) {
   const c = await cookies();
   c.set({
-    name: AUTH_COOKIE,
+    name: ADMIN_COOKIE,
     value: token,
     httpOnly: true,
     sameSite: "lax",
@@ -96,10 +97,10 @@ export async function setAuthCookie(token: string) {
   });
 }
 
-export async function clearAuthCookie() {
+export async function clearAdminAuthCookie() {
   const c = await cookies();
   c.set({
-    name: AUTH_COOKIE,
+    name: ADMIN_COOKIE,
     value: "",
     httpOnly: true,
     sameSite: "lax",
@@ -109,13 +110,44 @@ export async function clearAuthCookie() {
   });
 }
 
-export async function getAuthTokenFromCookies() {
+export async function getAdminAuthTokenFromCookies() {
   const c = await cookies();
-  return c.get(AUTH_COOKIE)?.value ?? null;
+  return c.get(ADMIN_COOKIE)?.value ?? null;
+}
+
+export async function setShopAuthCookie(token: string) {
+  const c = await cookies();
+  c.set({
+    name: SHOP_COOKIE,
+    value: token,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/shop",
+    maxAge: AUTH_MAX_AGE,
+  });
+}
+
+export async function clearShopAuthCookie() {
+  const c = await cookies();
+  c.set({
+    name: SHOP_COOKIE,
+    value: "",
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    path: "/shop",
+    maxAge: 0,
+  });
+}
+
+export async function getShopAuthTokenFromCookies() {
+  const c = await cookies();
+  return c.get(SHOP_COOKIE)?.value ?? null;
 }
 
 export async function redirectToLoginIfNoAuth(pathname: string) {
-  const token = await getAuthTokenFromCookies();
+  const token = await getAdminAuthTokenFromCookies();
   const protectedPrefixes = ["/dashboard", "/products", "/categories", "/carousel", "/users"];
   const isProtected = protectedPrefixes.some((p) => pathname.startsWith(p));
   if (isProtected && !token) {
