@@ -3,27 +3,21 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DATABASE_URL_UNPOOLED")
-}
-
-enum Role {
-  USER
-  ADMIN
-  SUPER_ADMIN
 }
 
 model User {
   id        String   @id @default(cuid())
   name      String
   phone     String?  @unique
-  email     String?  @unique
   password  String?
   role      Role     @default(USER)
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  email     String?  @unique
 }
 
 model Category {
@@ -36,29 +30,29 @@ model Category {
 }
 
 model Product {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  description String    @default("")
+  description String   @default("")
   price       BigInt
   imageUrl    String?
-  imagesJson  Json?
-  active      Boolean   @default(true)
+  active      Boolean  @default(true)
   categoryId  String
-  category    Category  @relation(fields: [categoryId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  imagesJson  Json?
   roomId      String?
-  room        Room?     @relation(fields: [roomId], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  category    Category @relation(fields: [categoryId], references: [id])
+  room        Room?    @relation(fields: [roomId], references: [id])
 }
 
 model Carousel {
-  id        String   @id @default(cuid())
-  title     String   @default("")
-  subTitle  String   @default("")
-  buttonText String  @default("")
+  id         String   @id @default(cuid())
+  title      String   @default("")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  buttonText String   @default("")
   imagesJson Json?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  subTitle   String   @default("")
 }
 
 model Room {
@@ -68,4 +62,93 @@ model Room {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   products  Product[]
+}
+
+model WhyItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String   @default("")
+  imageUrl    String?
+  order       Int      @default(0)
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model WhySettings {
+  id         String   @id @default(cuid())
+  title      String   @default("Why Choose FURSIA")
+  buttonText String   @default("Complete the why")
+  buttonLink String   @default("/about")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model BusinessPromo {
+  id          String   @id @default(cuid())
+  title       String   @default("Shop for Business")
+  description String   @default("")
+  buttonText  String   @default("Shop now")
+  buttonLink  String   @default("/shop")
+  imageUrl    String?
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model NewsPost {
+  id          String   @id @default(cuid())
+  title       String
+  category    String   @default("Berita")
+  slug        String   @unique
+  excerpt     String   @default("")
+  imageUrl    String?
+  publishedAt DateTime
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model NewsSettings {
+  id         String   @id @default(cuid())
+  title      String   @default("News")
+  buttonText String   @default("See all news")
+  buttonLink String   @default("/blogs/news")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model FooterSettings {
+  id        String   @id @default(cuid())
+  aboutText String   @default("")
+  copyright String   @default("")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String?
+  instagram String?
+  logoUrl   String?
+  whatsapp  String?
+}
+
+model FooterLink {
+  id        String   @id @default(cuid())
+  group     String
+  label     String
+  url       String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NewsletterSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
 }
