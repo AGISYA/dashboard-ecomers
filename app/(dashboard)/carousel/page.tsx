@@ -178,7 +178,7 @@ export default function CarouselPage() {
                   <Button
                     variant="destructive"
                     size="icon"
-                    className="size-7 rounded-md shadow-xl opacity-0 group-hover:opacity-100 transition-all scale-90 group-hover:scale-100"
+                    className="size-7 rounded-md shadow-xl transition-all scale-90 group-hover:scale-100"
                     onClick={() => removeSlide(idx)}
                   >
                     <X className="size-3.5" />

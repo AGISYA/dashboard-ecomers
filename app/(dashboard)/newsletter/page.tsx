@@ -109,7 +109,7 @@ export default function NewsletterPage() {
                                                     description="This email will be removed from the newsletter registry."
                                                     onConfirm={() => removeSub(sub.id)}
                                                     trigger={
-                                                        <Button variant="ghost" size="icon" className="size-8 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <Button variant="ghost" size="icon" className="size-8 rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-opacity">
                                                             <Trash2 className="size-3.5" />
                                                         </Button>
                                                     }

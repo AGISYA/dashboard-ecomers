@@ -60,7 +60,7 @@ export default async function DashboardPage() {
     <div className="space-y-8 animate-in fade-in duration-700">
       <PageHeader
         title="Dashboard Overview"
-        description="Welcome back! Here's a brief snapshot of your FURSIA store activity and inventory status."
+        description="Welcome back! Here's a brief snapshot of your tukang BIKIN store activity and inventory status."
         actions={
           <div className="flex items-center gap-2 px-3 py-1.5 bg-green-50 text-green-700 rounded-full text-[10px] font-black uppercase tracking-widest border border-green-100">
             <Activity className="size-3 animate-pulse" />
@@ -101,7 +101,7 @@ export default async function DashboardPage() {
           <div className="relative z-10">
             <h3 className="text-xl font-black mb-2">Premium Administration</h3>
             <p className="text-slate-400 text-sm mb-6 max-w-xs leading-relaxed">
-              Experience the full power of FURSIA Management tools. Everything you need to scale your business is right here.
+              Experience the full power of tukang BIKIN Management tools. Everything you need to scale your business is right here.
             </p>
             <button className="bg-white text-slate-900 px-6 py-2.5 rounded-xl text-sm font-black hover:bg-primary hover:text-white transition-all shadow-xl shadow-white/5">
               Explore Documentation

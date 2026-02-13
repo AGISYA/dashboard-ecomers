@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function GET(_: NextRequest) {
-  const posts = await (prisma as any).newsPost.findMany({
+  const posts = await prisma.newsPost.findMany({
     orderBy: { publishedAt: "desc" },
   });
   return NextResponse.json(
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Judul dan slug wajib" }, { status: 400 });
     }
 
-    const existing = await (prisma as any).newsPost.findUnique({
+    const existing = await prisma.newsPost.findUnique({
       where: { slug },
     });
     if (existing) {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const newPost = await (prisma as any).newsPost.create({
+    const newPost = await prisma.newsPost.create({
       data: {
         title,
         category: String(body.category ?? "Berita").trim(),

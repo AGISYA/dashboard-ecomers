@@ -3,11 +3,11 @@ import { prisma } from "@/lib/prisma";
 import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function GET(_: NextRequest) {
-    const row = await (prisma as any).whySettings.findFirst({
+    const row = await prisma.whySettings.findFirst({
         orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(row || {
-        title: "Why Choose FURSIA",
+        title: "Why Choose tukang BIKIN",
         buttonText: "Complete the why",
         buttonLink: "/about"
     });
@@ -20,21 +20,21 @@ export async function PUT(req: NextRequest) {
     }
     try {
         const body = await req.json();
-        const existing = await (prisma as any).whySettings.findFirst({
+        const existing = await prisma.whySettings.findFirst({
             orderBy: { createdAt: "desc" },
         });
 
         let result;
         if (!existing) {
-            result = await (prisma as any).whySettings.create({
+            result = await prisma.whySettings.create({
                 data: {
-                    title: body.title ?? "Why Choose FURSIA",
+                    title: body.title ?? "Why Choose tukang BIKIN",
                     buttonText: body.buttonText ?? "Complete the why",
                     buttonLink: body.buttonLink ?? "/about",
                 },
             });
         } else {
-            result = await (prisma as any).whySettings.update({
+            result = await prisma.whySettings.update({
                 where: { id: existing.id },
                 data: {
                     title: body.title ?? undefined,

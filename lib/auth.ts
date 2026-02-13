@@ -23,7 +23,7 @@ function base64url(input: Buffer) {
 }
 
 export function signJWT(payload: JwtPayload) {
-  const secret = process.env.AUTH_SECRET || "";
+  const secret = process.env.AUTH_SECRET || "default_secret";
   const header = { alg: "HS256", typ: "JWT" };
   const encHeader = base64url(Buffer.from(JSON.stringify(header)));
   const encPayload = base64url(Buffer.from(JSON.stringify(payload)));
@@ -37,7 +37,7 @@ export function signJWT(payload: JwtPayload) {
 
 export function verifyJWT(token: string): JwtPayload | null {
   try {
-    const secret = process.env.AUTH_SECRET || "";
+    const secret = process.env.AUTH_SECRET || "default_secret";
     const [encHeader, encPayload, encSig] = token.split(".");
     if (!encHeader || !encPayload || !encSig) return null;
     const data = `${encHeader}.${encPayload}`;

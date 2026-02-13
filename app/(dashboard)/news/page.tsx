@@ -4,7 +4,25 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { Upload, X, Search, Newspaper, Filter, Trash2, Globe, Calendar, CheckCircle2, Plus, Sparkles, Layout, Link as LinkIcon, Edit } from "lucide-react";
+import {
+  Upload,
+  Search,
+  Newspaper,
+  Trash2,
+  Globe,
+  Calendar,
+  CheckCircle2,
+  Plus,
+  Sparkles,
+  Layout,
+  Link as LinkIcon,
+  Save,
+  Clock,
+  Tag,
+  FileText,
+  ChevronRight,
+  Monitor
+} from "lucide-react";
 import { useNews, type NewsItem } from "@/hooks/useNews";
 import { useNewsSettings } from "@/hooks/useNewsSettings";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -49,10 +67,7 @@ export default function NewsPage() {
     const fd = new FormData();
     fd.set("file", files[0]);
     try {
-      const res = await fetch("/api/upload/image", {
-        method: "POST",
-        body: fd,
-      });
+      const res = await fetch("/api/upload/image", { method: "POST", body: fd });
       const j = await res.json().catch(() => ({}));
       if (res.ok) {
         const url = String(j.publicUrl || "").trim();
@@ -63,65 +78,72 @@ export default function NewsPage() {
   }
 
   async function create() {
-    const res = await fetch("/api/news", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title,
-        category,
-        slug,
-        excerpt,
-        imageUrl,
-        publishedAt,
-        active,
-      }),
-    });
-    if (res.ok) {
-      setTitle("");
-      setCategory("Berita");
-      setSlug("");
-      setExcerpt("");
-      setImageUrl("");
-      setPublishedAt("");
-      setActive(true);
-      refetch();
-      setSuccessMsg("Berita berhasil ditambahkan ke publikasi.");
+    try {
+      const res = await fetch("/api/news", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, category, slug, excerpt, imageUrl, publishedAt, active }),
+      });
+      if (res.ok) {
+        setTitle(""); setCategory("Berita"); setSlug(""); setExcerpt(""); setImageUrl(""); setPublishedAt(""); setActive(true);
+        refetch();
+        setSuccessMsg("Artikel diterbitkan.");
+      } else {
+        const j = await res.json().catch(() => ({}));
+        setSuccessMsg(`Gagal: ${j.error || "Terjadi kesalahan sistem"}`);
+      }
+    } catch (err) {
+      setSuccessMsg("Error: Tidak dapat terhubung ke server");
     }
   }
 
   async function saveSettings() {
-    const res = await fetch("/api/news/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: stitle,
-        buttonText: sbtnText,
-        buttonLink: sbtnLink,
-      }),
-    });
-    if (res.ok) {
-      refetchSettings();
-      setSuccessMsg("Pengaturan news berhasil diperbarui.");
+    try {
+      const res = await fetch("/api/news/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: stitle, buttonText: sbtnText, buttonLink: sbtnLink }),
+      });
+      if (res.ok) {
+        refetchSettings();
+        setSuccessMsg("Konfigurasi diupdate.");
+      } else {
+        setSuccessMsg("Gagal mengupdate konfigurasi.");
+      }
+    } catch {
+      setSuccessMsg("Error koneksi server.");
     }
   }
 
   async function update(id: string, partial: Partial<NewsItem>) {
-    const res = await fetch(`/api/news/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(partial),
-    });
-    if (res.ok) {
-      refetch();
-      setSuccessMsg("Berita berhasil diperbarui.");
+    try {
+      const res = await fetch(`/api/news/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(partial),
+      });
+      if (res.ok) {
+        refetch();
+        setSuccessMsg("Berita diperbarui.");
+      } else {
+        setSuccessMsg("Gagal memperbarui berita.");
+      }
+    } catch {
+      setSuccessMsg("Error koneksi server.");
     }
   }
 
   async function remove(id: string) {
-    const res = await fetch(`/api/news/${id}`, { method: "DELETE" });
-    if (res.ok) {
-      refetch();
-      setSuccessMsg("Berita berhasil dihapus.");
+    try {
+      const res = await fetch(`/api/news/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        refetch();
+        setSuccessMsg("Berita dihapus.");
+      } else {
+        setSuccessMsg("Gagal menghapus berita.");
+      }
+    } catch {
+      setSuccessMsg("Error koneksi server.");
     }
   }
 
@@ -131,181 +153,156 @@ export default function NewsPage() {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700">
+    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-700 pb-20">
       <PageHeader
-        title="Publikasi News & Artikel"
-        description="Kelola narasi brand dan konten editorial global di sini."
+        title="News & Artikel"
+        description="Kelola narasi editorial dan publikasi berita terbaru untuk pelanggan."
         actions={
-          successMsg && (
-            <div className="px-3 py-1.5 bg-slate-50 text-slate-600 rounded-lg text-xs font-medium border border-slate-100 animate-in fade-in duration-300">
-              <CheckCircle2 className="size-3.5 mr-1.5 inline text-emerald-500" />
-              {successMsg}
-            </div>
-          )
+          <div className="flex items-center gap-3">
+            {successMsg && (
+              <div className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold border border-emerald-100 animate-in slide-in-from-right-2">
+                {successMsg}
+              </div>
+            )}
+          </div>
         }
       />
 
-      <Card className="border-slate-100 shadow-sm rounded-xl overflow-hidden bg-white">
-        <CardHeader className="bg-slate-50/30 border-b border-slate-100/50 p-5 px-6 flex-row items-center justify-between space-y-0">
-          <div className="flex items-center gap-2.5 text-slate-800">
-            <Layout className="size-4 text-slate-400" />
-            <CardTitle className="text-sm font-semibold">Konfigurasi Umum News</CardTitle>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium text-slate-500 text-uppercase tracking-wider">Judul Halaman Utama</label>
-              <Input
-                value={stitle}
-                onChange={(e) => setStitle(e.target.value)}
-                placeholder="News"
-                className="bg-white border-slate-200 rounded-lg font-bold"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium text-slate-500 text-uppercase tracking-wider">Teks Tombol Navigasi</label>
-              <Input
-                value={sbtnText}
-                onChange={(e) => setSbtnText(e.target.value)}
-                placeholder="See all news"
-                className="bg-white border-slate-200 rounded-lg"
-              />
-            </div>
-            <div className="space-y-1.5">
-              <label className="text-[11px] font-medium text-slate-500 text-uppercase tracking-wider">Link Redirect Utama</label>
-              <div className="relative">
-                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
-                <Input
-                  value={sbtnLink}
-                  onChange={(e) => setSbtnLink(e.target.value)}
-                  placeholder="/blogs/news"
-                  className="bg-white border-slate-200 rounded-lg pl-9 text-xs font-mono"
-                />
-              </div>
-            </div>
-          </div>
-          <div className="mt-6 pt-6 border-t border-slate-50 flex justify-end">
-            <Button onClick={saveSettings} className="bg-slate-900 text-white rounded-lg px-8 h-10 text-xs font-bold uppercase tracking-widest hover:bg-slate-800">
-              Perbarui Konfigurasi
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* News Settings */}
         <div className="lg:col-span-12">
-          <Card className="border-slate-100 shadow-sm rounded-xl overflow-hidden bg-white">
-            <CardHeader className="bg-slate-50/30 border-b border-slate-100/50 p-5 px-6 flex-row items-center justify-between space-y-0">
-              <div className="flex items-center gap-2.5 text-slate-800">
-                <Sparkles className="size-4 text-slate-400" />
-                <CardTitle className="text-sm font-semibold">Publikasi Baru</CardTitle>
+          <Card className="border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden bg-white">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100/50 py-4 px-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="size-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                    <Layout className="size-4 text-white" />
+                  </div>
+                  <CardTitle className="text-sm font-bold text-slate-900 uppercase">Navigasi Global News</CardTitle>
+                </div>
+                <Button onClick={saveSettings} className="h-9 px-5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-[10px] uppercase shadow-md">
+                  Update Settings
+                </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-8 space-y-8">
+            <CardContent className="p-8">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Judul Halaman</label>
+                  <Input value={stitle} onChange={(e) => setStitle(e.target.value)} className="h-12 bg-slate-50/50 border-slate-200 rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Label Tombol</label>
+                  <Input value={sbtnText} onChange={(e) => setSbtnText(e.target.value)} className="h-12 bg-slate-50/50 border-slate-200 rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-1">Link Tujuan</label>
+                  <div className="relative">
+                    <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+                    <Input value={sbtnLink} onChange={(e) => setSbtnLink(e.target.value)} className="h-12 bg-slate-50/50 border-slate-200 rounded-xl pl-11 font-mono text-xs" />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Create Publication */}
+        <div className="lg:col-span-12">
+          <Card className="border-slate-100 shadow-xl shadow-slate-200/50 rounded-3xl overflow-hidden bg-white">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100/50 py-5 px-8">
+              <div className="flex items-center gap-3">
+                <div className="size-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                  <Sparkles className="size-4 text-white" />
+                </div>
+                <CardTitle className="text-base font-bold text-slate-900">Publikasi Baru</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent className="p-8">
               <div className="grid lg:grid-cols-12 gap-10">
                 <div className="lg:col-span-4 space-y-6">
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-medium text-slate-500">Gambar Utama (Visual)</label>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Thumbnail Cover</label>
                     <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleUploadFiles(e.target.files)} />
                     <div
-                      className="relative aspect-video rounded-lg border border-dashed border-slate-200 bg-slate-50/50 overflow-hidden flex flex-col items-center justify-center group cursor-pointer hover:bg-slate-50 transition-all shadow-inner"
                       onClick={() => fileRef.current?.click()}
+                      className="relative aspect-video rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center group cursor-pointer hover:border-slate-900/10 hover:bg-slate-50 transition-all overflow-hidden"
                     >
                       {!imageUrl ? (
                         <div className="text-center p-6 space-y-2">
                           <Upload className="size-6 text-slate-300 mx-auto" />
-                          <p className="text-[11px] font-medium text-slate-400 italic font-bold">Upload Visual</p>
+                          <p className="text-[10px] font-bold text-slate-300 uppercase">Pilih Visual</p>
                         </div>
                       ) : (
                         <>
                           <Image src={imageUrl} alt="preview" fill className="object-cover" />
-                          <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-[2px]">
-                            <Button variant="secondary" className="rounded-lg text-[10px] font-semibold h-8 bg-white/90 text-slate-900 border-none shadow-sm">Ganti media</Button>
+                          <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity backdrop-blur-[2px]">
+                            <Button variant="secondary" className="rounded-xl text-[10px] font-bold h-8 bg-white border-none shadow-xl">Ganti Media</Button>
                           </div>
                         </>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 py-3 px-4 bg-slate-50/50 rounded-lg border border-slate-100">
-                    <input
-                      type="checkbox"
-                      checked={active}
-                      onChange={(e) => setActive(e.target.checked)}
-                      className="size-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
-                    />
-                    <div className="flex flex-col">
-                      <span className="text-[11px] font-semibold text-slate-800">Visibilitas Publik</span>
-                      <span className="text-[10px] text-slate-400 font-medium italic">Langsung publikasikan</span>
+                  <div className="flex items-center justify-between p-4 bg-slate-50/50 rounded-2xl border border-slate-100">
+                    <div className="flex items-center gap-3">
+                      <div className={`size-8 rounded-lg flex items-center justify-center ${active ? 'bg-emerald-500/10 text-emerald-600' : 'bg-slate-200 text-slate-400'}`}>
+                        <Globe className="size-3.5" />
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-900 uppercase">Live</span>
                     </div>
+                    <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} className="size-5 rounded border-slate-200 text-slate-900 focus:ring-slate-900 cursor-pointer" />
                   </div>
                 </div>
 
                 <div className="lg:col-span-8 space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-slate-500">Judul (Kategori/Label)</label>
-                      <Input
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        placeholder="Berita, Event, atau Promo"
-                        className="h-10 bg-white border-slate-200 focus:ring-1 focus:ring-slate-900 rounded-lg font-medium shadow-sm"
-                      />
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Label Kategori</label>
+                      <div className="relative group">
+                        <Tag className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                        <Input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="Berita" className="h-12 bg-white border-slate-200 rounded-xl pl-12 font-bold" />
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-slate-500">Judul Berita (Utama)</label>
-                      <Input
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Contoh: Koleksi Teakwood Terbaru 2026"
-                        className="h-10 bg-white border-slate-200 focus:ring-1 focus:ring-slate-900 rounded-lg font-bold shadow-sm"
-                      />
+                    <div className="space-y-2">
+                      <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Misal: Launching tukang BIKIN v2" className="h-12 bg-white border-slate-200 rounded-xl font-bold" />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-slate-500">URL Identitas (Slug)</label>
-                      <Input
-                        value={slug}
-                        onChange={(e) => setSlug(e.target.value)}
-                        placeholder="koleksi-teakwood-terbaru-2026"
-                        className="bg-white border-slate-200 rounded-lg font-mono text-[11px] text-slate-500"
-                      />
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">SEO Slug</label>
+                      <div className="relative group">
+                        <LinkIcon className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                        <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="launching-tukang-bikin-v2" className="h-12 bg-white border-slate-200 rounded-xl pl-12 font-mono text-xs" />
+                      </div>
                     </div>
-                    <div className="space-y-1.5">
-                      <label className="text-[11px] font-medium text-slate-500">Tanggal Terbit</label>
-                      <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
-                        <Input
-                          type="date"
-                          value={publishedAt}
-                          onChange={(e) => setPublishedAt(e.target.value)}
-                          className="bg-white border-slate-200 rounded-lg pl-9 text-sm font-medium"
-                        />
+                    <div className="space-y-2">
+                      <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Tanggal Terbit</label>
+                      <div className="relative group">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
+                        <Input type="date" value={publishedAt} onChange={(e) => setPublishedAt(e.target.value)} className="h-12 bg-white border-slate-200 rounded-xl pl-12 text-xs font-bold" />
                       </div>
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <label className="text-[11px] font-medium text-slate-500">Deskripsi Berita (Narasi)</label>
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold text-slate-400 uppercase tracking-widest px-1">Ringkasan / Narasi</label>
                     <textarea
                       value={excerpt}
                       onChange={(e) => setExcerpt(e.target.value)}
-                      placeholder="Tuliskan isi atau ringkasan berita di sini..."
-                      className="w-full h-40 bg-white border border-slate-200 focus:ring-1 focus:ring-slate-900 rounded-lg text-sm p-4 outline-none transition-all resize-none leading-relaxed"
+                      placeholder="Tuliskan isi atau kutipan artikel di sini..."
+                      className="w-full h-32 bg-white border border-slate-200 focus:ring-2 focus:ring-slate-900/5 rounded-2xl text-sm p-5 outline-none transition-all leading-relaxed font-medium resize-none placeholder:text-slate-300"
                     />
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-4 flex justify-end">
                     <ConfirmDialog
-                      title="Publikasikan draf saat ini?"
-                      description="Berita ini akan segera terlihat oleh semua pelanggan."
+                      title="Publikasikan Artikel?"
                       onConfirm={create}
                       trigger={
-                        <Button className="w-full lg:w-fit h-11 px-10 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest">
-                          Simpan & Terbitkan
+                        <Button className="h-12 px-10 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs uppercase tracking-widest shadow-xl">
+                          Terbitkan Sekarang
                         </Button>
                       }
                     />
@@ -316,21 +313,24 @@ export default function NewsPage() {
           </Card>
         </div>
 
-        <div className="lg:col-span-12 space-y-6">
-          <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-5 border-b border-slate-100 bg-slate-50/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div className="flex items-center gap-2.5 text-slate-800">
-                <Newspaper className="size-4 text-slate-400" />
-                <h3 className="text-sm font-semibold">Log Publikasi</h3>
+        {/* Article Log */}
+        <div className="lg:col-span-12">
+          <div className="bg-white rounded-[32px] border border-slate-100 shadow-xl shadow-slate-200/50 overflow-hidden">
+            <div className="px-8 py-6 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="size-8 rounded-lg bg-slate-900 flex items-center justify-center">
+                  <Newspaper className="size-4 text-white" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900 uppercase">Log Publikasi</h3>
               </div>
 
-              <div className="relative group">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-slate-400" />
+              <div className="relative group min-w-[320px]">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Filter catatan..."
-                  className="min-w-[280px] h-9 bg-white border-slate-200 rounded-lg pl-9 pr-4 text-xs font-medium outline-none focus:ring-1 focus:ring-slate-900 placeholder:text-slate-400 border shadow-sm"
+                  placeholder="Cari artikel atau kutipan..."
+                  className="w-full h-11 bg-white border-slate-200 rounded-xl pl-11 pr-4 text-xs font-medium outline-none focus:ring-2 focus:ring-slate-900/5 border transition-all"
                 />
               </div>
             </div>
@@ -339,106 +339,66 @@ export default function NewsPage() {
               <table className="w-full">
                 <thead>
                   <tr className="bg-slate-50/30">
-                    <th className="px-8 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider w-40">Tanggal Rilis</th>
-                    <th className="px-8 py-3 text-left text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Detail Editorial</th>
-                    <th className="px-8 py-3 text-center text-[11px] font-semibold text-slate-500 uppercase tracking-wider w-32">Visibilitas</th>
-                    <th className="px-8 py-3 text-right text-[11px] font-semibold text-slate-500 uppercase tracking-wider w-24">Aksi</th>
+                    <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest w-48">Audit Trail</th>
+                    <th className="px-8 py-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-widest">Detail Publikasi</th>
+                    <th className="px-8 py-4 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest w-32">Visibilitas</th>
+                    <th className="px-8 py-4 text-right text-[10px] font-bold text-slate-400 uppercase tracking-widest w-24">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50">
-                  {filteredNews.map((it, idx) => (
-                    <tr key={it.id} className="group hover:bg-slate-50/30 transition-all duration-300">
-                      <td className="px-8 py-8">
-                        <div className="flex items-center gap-2 text-xs font-black text-slate-700 italic">
-                          <Calendar className="size-3 text-slate-300" />
-                          <Input
-                            type="date"
-                            value={it.publishedAt?.slice(0, 10) || ""}
-                            onChange={(e) => update(it.id, { publishedAt: e.target.value })}
-                            className="bg-transparent border-none p-0 focus:ring-0 font-bold text-xs h-auto w-fit"
-                          />
+                  {filteredNews.map((it) => (
+                    <tr key={it.id} className="group hover:bg-slate-50/50 transition-colors">
+                      <td className="px-8 py-8 align-top">
+                        <div className="flex flex-col gap-2">
+                          <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 bg-slate-100 w-fit px-2 py-1 rounded-md">
+                            <Clock className="size-3" />
+                            {it.publishedAt ? new Date(it.publishedAt).toLocaleDateString() : 'N/A'}
+                          </div>
                         </div>
                       </td>
                       <td className="px-8 py-8">
                         <div className="flex gap-6">
                           {it.imageUrl && (
-                            <div className="relative size-24 rounded-2xl overflow-hidden border-4 border-white shadow-xl bg-slate-50 shrink-0 transform -rotate-1 group-hover:rotate-0 transition-transform">
+                            <div className="relative size-24 rounded-2xl overflow-hidden border border-slate-100 shadow-sm shrink-0">
                               <Image src={it.imageUrl} alt={it.title} fill className="object-cover" />
                             </div>
                           )}
                           <div className="space-y-3 flex-1 min-w-0">
-                            <div className="flex flex-col gap-1">
-                              <input
-                                value={it.category}
-                                onChange={(e) => update(it.id, { category: e.target.value })}
-                                placeholder="Judul/Kategori"
-                                className="w-full bg-transparent border-transparent hover:border-slate-100 focus:bg-white focus:border-primary/20 transition-all rounded-lg font-bold text-slate-400 text-[10px] uppercase tracking-wider p-0 focus:p-1 outline-none"
-                              />
-                              <input
-                                value={it.title}
-                                onChange={(e) => update(it.id, { title: e.target.value })}
-                                placeholder="Judul Utama"
-                                className="w-full bg-transparent border-transparent hover:border-slate-100 focus:bg-white focus:border-primary/20 transition-all rounded-lg font-black text-slate-900 text-lg p-0 focus:p-1 outline-none"
-                              />
+                            <div>
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{it.category}</p>
+                              <h4 className="text-base font-bold text-slate-900 mt-1 line-clamp-1">{it.title}</h4>
                             </div>
-                            <textarea
-                              value={it.excerpt}
-                              onChange={(e) => update(it.id, { excerpt: e.target.value })}
-                              onBlur={(e) => update(it.id, { excerpt: e.target.value })}
-                              className="w-full bg-transparent border-transparent hover:border-slate-100 focus:bg-white focus:border-primary/20 transition-all rounded-lg text-xs font-medium text-slate-400 p-0 focus:p-1 outline-none resize-none leading-relaxed h-12"
-                            />
-
-                            <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Button variant="ghost" size="sm" onClick={() => fileRef.current?.click()} className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-primary hover:bg-primary/5">Change Media</Button>
-                              <span className="text-slate-200">|</span>
-                              <ConfirmDialog
-                                title="Delete Article Cover?"
-                                onConfirm={() => update(it.id, { imageUrl: null })}
-                                trigger={<Button variant="ghost" size="sm" className="h-7 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-destructive hover:bg-destructive/5">Remove Visual</Button>}
-                              />
-                            </div>
+                            <p className="text-xs text-slate-500 font-medium line-clamp-2 leading-relaxed">{it.excerpt}</p>
                           </div>
                         </div>
                       </td>
-                      <td className="px-8 py-8 text-center text-center">
+                      <td className="px-8 py-8 text-center sm:align-middle">
+                        <div className={cn(
+                          "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border",
+                          it.active ? "bg-emerald-50 text-emerald-700 border-emerald-100" : "bg-slate-100 text-slate-400 border-slate-200"
+                        )}>
+                          {it.active ? "Published" : "Draft"}
+                        </div>
+                      </td>
+                      <td className="px-8 py-8 text-right sm:align-middle">
                         <ConfirmDialog
-                          title={it.active ? "Withdraw Publication?" : "Restore Publication?"}
-                          onConfirm={() => update(it.id, { active: !it.active })}
+                          title="Hapus Artikel?"
+                          onConfirm={() => remove(it.id)}
                           trigger={
-                            <div className={cn(
-                              "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest cursor-pointer transition-all",
-                              it.active ? "bg-amber-50 text-amber-700 border border-amber-100" : "bg-slate-50 text-slate-400 border border-slate-100"
-                            )}>
-                              <Globe className={cn("size-3", it.active ? "animate-spin-slow" : "")} />
-                              {it.active ? "Live" : "Draft"}
-                            </div>
+                            <Button variant="ghost" size="icon" className="size-9 rounded-xl text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all">
+                              <Trash2 className="size-4" />
+                            </Button>
                           }
                         />
-                      </td>
-                      <td className="px-8 py-8 text-right">
-                        <div className="flex justify-end pr-2">
-                          <ConfirmDialog
-                            title="Permanent Deletion?"
-                            description="This will remove the news item from our database forever."
-                            onConfirm={() => remove(it.id)}
-                            trigger={
-                              <Button variant="ghost" size="icon" className="size-10 rounded-xl text-slate-300 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <Trash2 className="size-5" />
-                              </Button>
-                            }
-                          />
-                        </div>
                       </td>
                     </tr>
                   ))}
                   {filteredNews.length === 0 && (
                     <tr>
-                      <td colSpan={4} className="py-24 text-center">
-                        <div className="flex flex-col items-center gap-4 max-w-xs mx-auto text-slate-200">
-                          <div className="size-20 rounded-3xl bg-slate-50 flex items-center justify-center">
-                            <Newspaper className="size-10" />
-                          </div>
-                          <p className="text-xs font-black uppercase tracking-widest">No matching articles</p>
+                      <td colSpan={4} className="py-20 text-center">
+                        <div className="flex flex-col items-center gap-2 text-slate-300">
+                          <Newspaper className="size-10" />
+                          <p className="text-[10px] font-bold uppercase tracking-widest">Tidak ada artikel ditemukan</p>
                         </div>
                       </td>
                     </tr>

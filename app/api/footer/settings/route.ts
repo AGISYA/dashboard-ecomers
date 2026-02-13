@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function GET(_: NextRequest) {
-  const row = await (prisma as any).footerSettings.findFirst({
+  const row = await prisma.footerSettings.findFirst({
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(row || null);
@@ -34,13 +34,13 @@ export async function PUT(req: NextRequest) {
       whatsapp?: string;
       logoUrl?: string;
     };
-    const existing = await (prisma as any).footerSettings.findFirst({
+    const existing = await prisma.footerSettings.findFirst({
       orderBy: { createdAt: "desc" },
     });
 
     let result;
     if (!existing) {
-      result = await (prisma as any).footerSettings.create({
+      result = await prisma.footerSettings.create({
         data: {
           aboutText: body.aboutText ?? "",
           copyright: body.copyright ?? "",
@@ -51,7 +51,7 @@ export async function PUT(req: NextRequest) {
         },
       });
     } else {
-      result = await (prisma as any).footerSettings.update({
+      result = await prisma.footerSettings.update({
         where: { id: existing.id },
         data: {
           aboutText: body.aboutText ?? undefined,

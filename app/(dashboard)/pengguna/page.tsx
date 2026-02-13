@@ -15,7 +15,17 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Edit, Trash2, Save, X, Plus, ShieldCheck, ShieldAlert, UserCog, Key } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Save,
+  X,
+  Plus,
+  ShieldCheck,
+  ShieldAlert,
+  UserCog,
+  Key,
+} from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +54,7 @@ export default function PenggunaPage() {
   const [editPassword, setEditPassword] = useState("");
 
   function startEdit(u: UserItem) {
+    if (me?.role !== "SUPER_ADMIN") return;
     setEditingId(u.id);
     setEditName(u.name);
     setEditPhone(u.phone || "");
@@ -53,6 +64,7 @@ export default function PenggunaPage() {
   }
 
   async function saveEdit() {
+    if (me?.role !== "SUPER_ADMIN") return;
     if (!editingId) return;
     const res = await fetch(`/api/users/${editingId}`, {
       method: "PUT",
@@ -74,6 +86,7 @@ export default function PenggunaPage() {
   }
 
   async function deleteUser(id: string) {
+    if (me?.role !== "SUPER_ADMIN") return;
     if (confirm("Are you sure you want to delete this administrator?")) {
       const res = await fetch(`/api/users/${id}`, { method: "DELETE" });
       if (res.ok) refetch();
@@ -88,19 +101,23 @@ export default function PenggunaPage() {
         </div>
         <div className="text-center space-y-1">
           <h3 className="text-xl font-black text-slate-900">Access Denied</h3>
-          <p className="text-sm font-medium text-slate-500">Only authorized administrators can access this management console.</p>
+          <p className="text-sm font-medium text-slate-500">
+            Only authorized administrators can access this management console.
+          </p>
         </div>
       </div>
     );
   }
 
-  const admins = (data ?? []).filter((u) => u.role === "ADMIN" || u.role === "SUPER_ADMIN");
+  const admins = (data ?? []).filter(
+    (u) => u.role === "ADMIN" || u.role === "SUPER_ADMIN",
+  );
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <PageHeader
-        title="Staf Admin"
-        description="Konfigurasi administrator sistem, tentukan peran, dan kelola akses internal ke Dashboard FURSIA."
+        title="Admin"
+        description="Daftar administrator sistem. Admin hanya dapat melihat; SUPER ADMIN dapat mengelola."
         actions={
           canCreateAdmin && (
             <Button
@@ -127,9 +144,12 @@ export default function PenggunaPage() {
           </TableHeader>
           <TableBody>
             {admins.map((u) => (
-              <TableRow key={u.id} className="group hover:bg-slate-50/50 transition-colors">
+              <TableRow
+                key={u.id}
+                className="group hover:bg-slate-50/50 transition-colors"
+              >
                 <TableCell className="py-4 font-bold text-slate-900 border-l-4 border-transparent hover:border-primary transition-all">
-                  {editingId === u.id ? (
+                  {editingId === u.id && me?.role === "SUPER_ADMIN" ? (
                     <Input
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
@@ -137,24 +157,34 @@ export default function PenggunaPage() {
                     />
                   ) : (
                     <div className="flex items-center gap-3 pl-2">
-                      <div className={cn(
-                        "size-10 rounded-xl flex items-center justify-center text-[10px] font-black shadow-sm transform transition-transform group-hover:scale-110",
-                        u.role === "SUPER_ADMIN"
-                          ? "bg-slate-900 text-white"
-                          : "bg-primary/10 text-primary"
-                      )}>
-                        {u.role === "SUPER_ADMIN" ? <ShieldCheck size={20} /> : <UserCog size={20} />}
+                      <div
+                        className={cn(
+                          "size-10 rounded-xl flex items-center justify-center text-[10px] font-black shadow-sm transform transition-transform group-hover:scale-110",
+                          u.role === "SUPER_ADMIN"
+                            ? "bg-slate-900 text-white"
+                            : "bg-primary/10 text-primary",
+                        )}
+                      >
+                        {u.role === "SUPER_ADMIN" ? (
+                          <ShieldCheck size={20} />
+                        ) : (
+                          <UserCog size={20} />
+                        )}
                       </div>
                       <div className="flex flex-col">
                         <span className="truncate max-w-[150px]">{u.name}</span>
-                        {u.id === me?.id && <span className="text-[9px] text-primary font-black uppercase tracking-tighter">(You)</span>}
+                        {u.id === me?.id && (
+                          <span className="text-[9px] text-primary font-black uppercase tracking-tighter">
+                            (You)
+                          </span>
+                        )}
                       </div>
                     </div>
                   )}
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-col gap-0.5">
-                    {editingId === u.id ? (
+                    {editingId === u.id && me?.role === "SUPER_ADMIN" ? (
                       <div className="space-y-2">
                         <Input
                           placeholder="Phone"
@@ -171,18 +201,24 @@ export default function PenggunaPage() {
                       </div>
                     ) : (
                       <>
-                        <span className="text-xs font-bold text-slate-700">{u.phone || "No Phone"}</span>
-                        <span className="text-[10px] font-medium text-slate-400">{u.email || "No Email"}</span>
+                        <span className="text-xs font-bold text-slate-700">
+                          {u.phone || "No Phone"}
+                        </span>
+                        <span className="text-[10px] font-medium text-slate-400">
+                          {u.email || "No Email"}
+                        </span>
                       </>
                     )}
                   </div>
                 </TableCell>
                 <TableCell>
-                  {editingId === u.id ? (
+                  {editingId === u.id && me?.role === "SUPER_ADMIN" ? (
                     <select
                       className="h-9 w-full rounded-lg border border-slate-100 bg-slate-50 px-3 text-xs font-bold text-slate-600 focus:ring-2 focus:ring-primary/10 appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2394a3b8%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22m6%209%206%206%206-6%22%2F%3E%3C%2Fsvg%3E')] bg-[length:16px] bg-[right_8px_center] bg-no-repeat pr-8"
                       value={editRole}
-                      onChange={(e) => setEditRole(e.target.value as "ADMIN" | "SUPER_ADMIN")}
+                      onChange={(e) =>
+                        setEditRole(e.target.value as "ADMIN" | "SUPER_ADMIN")
+                      }
                     >
                       <option value="ADMIN">ADMIN</option>
                       <option value="SUPER_ADMIN">SUPER_ADMIN</option>
@@ -190,14 +226,16 @@ export default function PenggunaPage() {
                   ) : (
                     <Badge
                       className="rounded-lg px-2 py-0.5 text-[9px] font-black uppercase tracking-wider"
-                      variant={u.role === "SUPER_ADMIN" ? "destructive" : "default"}
+                      variant={
+                        u.role === "SUPER_ADMIN" ? "destructive" : "default"
+                      }
                     >
                       {u.role.replace("_", " ")}
                     </Badge>
                   )}
                 </TableCell>
                 <TableCell>
-                  {editingId === u.id ? (
+                  {editingId === u.id && me?.role === "SUPER_ADMIN" ? (
                     <div className="flex flex-col gap-2">
                       <label className="flex items-center gap-2 cursor-pointer">
                         <input
@@ -206,7 +244,9 @@ export default function PenggunaPage() {
                           checked={editActive}
                           onChange={(e) => setEditActive(e.target.checked)}
                         />
-                        <span className="text-xs font-bold text-slate-600">Active</span>
+                        <span className="text-xs font-bold text-slate-600">
+                          Active
+                        </span>
                       </label>
                       <div className="relative">
                         <Key className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3 text-slate-400" />
@@ -220,51 +260,57 @@ export default function PenggunaPage() {
                       </div>
                     </div>
                   ) : (
-                    <Badge className="rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-widest" variant={u.active ? "success" : "secondary"}>
+                    <Badge
+                      className="rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-widest"
+                      variant={u.active ? "success" : "secondary"}
+                    >
                       {u.active ? "ONLINE" : "LOCKED"}
                     </Badge>
                   )}
                 </TableCell>
                 <TableCell className="text-right">
-                  {editingId === u.id ? (
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={saveEdit}
-                        className="size-9 rounded-xl bg-green-50 text-green-600 hover:bg-green-100"
-                      >
-                        <Save className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setEditingId(null)}
-                        className="size-9 rounded-xl bg-slate-50 text-slate-500 hover:bg-slate-100"
-                      >
-                        <X className="size-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => startEdit(u)}
-                        className="size-9 rounded-xl text-slate-400 hover:text-primary hover:bg-primary/10"
-                      >
-                        <Edit className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deleteUser(u.id)}
-                        disabled={u.id === me?.id}
-                        className="size-9 rounded-xl text-slate-400 hover:text-destructive hover:bg-destructive/10 disabled:hidden"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
+                  {me?.role === "SUPER_ADMIN" && (
+                    <>
+                      {editingId === u.id ? (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={saveEdit}
+                            className="size-9 rounded-xl bg-green-50 text-green-600 hover:bg-green-100"
+                          >
+                            <Save className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => setEditingId(null)}
+                            className="size-9 rounded-xl bg-slate-50 text-slate-600 hover:bg-slate-100"
+                          >
+                            <X className="size-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => startEdit(u)}
+                            className="size-9 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100"
+                          >
+                            <Edit className="size-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => deleteUser(u.id)}
+                            className="size-9 rounded-xl bg-red-50 text-red-600 hover:bg-red-100"
+                          >
+                            <Trash2 className="size-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </TableCell>
               </TableRow>

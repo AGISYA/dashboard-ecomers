@@ -8,7 +8,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_: NextRequest, { params }: Ctx) {
   const { id } = await params;
-  const item = await (prisma as any).whyItem.findUnique({
+  const item = await prisma.whyItem.findUnique({
     where: { id },
   });
   if (!item) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -30,7 +30,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
       order?: number;
       active?: boolean;
     };
-    const updatedItem = await (prisma as any).whyItem.update({
+    const updatedItem = await prisma.whyItem.update({
       where: { id },
       data: {
         title: body.title ?? undefined,
@@ -55,7 +55,7 @@ export async function DELETE(_: NextRequest, { params }: Ctx) {
   }
   const { id } = await params;
   try {
-    await (prisma as any).whyItem.delete({
+    await prisma.whyItem.delete({
       where: { id },
     });
     return NextResponse.json({ ok: true });

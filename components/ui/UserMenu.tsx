@@ -35,7 +35,19 @@ export default function UserMenu() {
 
   async function logout() {
     const path = typeof window !== "undefined" ? window.location.pathname : "";
-    const isAdminArea = ["/dashboard", "/products", "/categories", "/carousel", "/users"].some((p) =>
+    const isAdminArea = [
+      "/dashboard",
+      "/products",
+      "/categories",
+      "/carousel",
+      "/users",
+      "/rooms",
+      "/why",
+      "/business",
+      "/news",
+      "/footer",
+      "/pengguna",
+    ].some((p) =>
       path.startsWith(p)
     );
     const endpoint = isAdminArea ? "/api/auth/logout" : "/api/shop/auth/logout";
@@ -55,7 +67,7 @@ export default function UserMenu() {
         {initial}
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-48 card p-2">
+        <div className="absolute right-0 mt-2 w-56 bg-white border border-slate-100 shadow-xl rounded-xl p-2 z-50">
           <div className="px-3 py-2 text-sm">
             <div className="font-semibold">{me?.name || "Pengguna"}</div>
             <div className="text-muted">{me?.phone || ""}</div>

@@ -13,7 +13,13 @@ export default function LoginPage() {
     (async () => {
       const res = await fetch("/api/auth/me", { credentials: "include" });
       const data = await res.json().catch(() => null);
-      if (data && data.id) router.replace("/dashboard");
+      if (data && data.id) {
+        if (data.role === "ADMIN" || data.role === "SUPER_ADMIN") {
+          router.replace("/dashboard");
+        } else {
+          router.replace("/shop");
+        }
+      }
     })();
   }, [router]);
 
@@ -32,7 +38,12 @@ export default function LoginPage() {
       setError(j.error || "Login gagal");
       return;
     }
-    router.replace("/dashboard");
+    const j = await res.json().catch(() => ({}));
+    if (j.redirectTo) {
+      router.replace(j.redirectTo);
+    } else {
+      router.replace("/dashboard");
+    }
   }
 
   return (
@@ -68,12 +79,6 @@ export default function LoginPage() {
         >
           {loading ? "Memproses..." : "Masuk"}
         </button>
-        <div className="text-sm text-muted-foreground">
-          Belum punya akun?{" "}
-          <a className="underline" href="/register">
-            Daftar
-          </a>
-        </div>
       </form>
     </div>
   );

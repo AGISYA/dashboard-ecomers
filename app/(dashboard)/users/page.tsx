@@ -15,7 +15,16 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Badge } from "@/components/ui/Badge";
-import { Edit, Trash2, Save, X, Plus, UserPlus, Users2, ShieldAlert } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Save,
+  X,
+  Plus,
+  UserPlus,
+  Users2,
+  ShieldAlert,
+} from "lucide-react";
 import { PageHeader } from "@/components/ui/PageHeader";
 
 export default function UsersPage() {
@@ -79,8 +88,12 @@ export default function UsersPage() {
           <ShieldAlert className="size-8" />
         </div>
         <div className="text-center space-y-1">
-          <h3 className="text-xl font-black text-slate-900">Access Restricted</h3>
-          <p className="text-sm font-medium text-slate-500">You must have administrator privileges to view this page.</p>
+          <h3 className="text-xl font-black text-slate-900">
+            Access Restricted
+          </h3>
+          <p className="text-sm font-medium text-slate-500">
+            Anda harus admin untuk melihat halaman ini.
+          </p>
         </div>
       </div>
     );
@@ -91,8 +104,8 @@ export default function UsersPage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <PageHeader
-        title="Pelanggan Toko"
-        description="Pantau dan kelola pengguna yang terdaftar di toko Anda. Lihat aktivitas, perbarui profil, atau kelola izin akses."
+        title="User Ecomers"
+        description="Kelola akun pelanggan e-commerce. Admin dapat menambah, mengedit, dan menghapus akun pelanggan."
         actions={
           <Button
             onClick={() => router.push("/users/new")}
@@ -116,7 +129,10 @@ export default function UsersPage() {
           </TableHeader>
           <TableBody>
             {users.map((u) => (
-              <TableRow key={u.id} className="group hover:bg-slate-50/50 transition-colors">
+              <TableRow
+                key={u.id}
+                className="group hover:bg-slate-50/50 transition-colors"
+              >
                 <TableCell className="py-4 font-bold text-slate-900">
                   {editingId === u.id ? (
                     <Input
@@ -152,8 +168,12 @@ export default function UsersPage() {
                       </div>
                     ) : (
                       <>
-                        <span className="text-xs font-bold text-slate-700 font-mono tracking-tight">{u.phone || "No Phone"}</span>
-                        <span className="text-[10px] font-medium text-slate-400 truncate max-w-[150px]">{u.email || "No Email"}</span>
+                        <span className="text-xs font-bold text-slate-700 font-mono tracking-tight">
+                          {u.phone || "No Phone"}
+                        </span>
+                        <span className="text-[10px] font-medium text-slate-400 truncate max-w-[150px]">
+                          {u.email || "No Email"}
+                        </span>
                       </>
                     )}
                   </div>
@@ -168,7 +188,9 @@ export default function UsersPage() {
                           checked={editActive}
                           onChange={(e) => setEditActive(e.target.checked)}
                         />
-                        <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">Active Status</span>
+                        <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">
+                          Active Status
+                        </span>
                       </label>
                       <Input
                         type="password"
@@ -179,7 +201,10 @@ export default function UsersPage() {
                       />
                     </div>
                   ) : (
-                    <Badge className="rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-widest" variant={u.active ? "success" : "secondary"}>
+                    <Badge
+                      className="rounded-lg px-2.5 py-1 text-[10px] font-black uppercase tracking-widest"
+                      variant={u.active ? "success" : "secondary"}
+                    >
                       {u.active ? "Enabled" : "Disabled"}
                     </Badge>
                   )}
@@ -232,8 +257,17 @@ export default function UsersPage() {
                 <TableCell colSpan={4} className="py-20 text-center">
                   <div className="flex flex-col items-center gap-3">
                     <Users2 className="size-12 text-slate-200" />
-                    <p className="text-sm font-bold text-slate-400 mb-1">No customers registered yet.</p>
-                    <Button variant="outline" size="sm" onClick={() => router.push("/users/new")} className="rounded-lg">Be the first to create one</Button>
+                    <p className="text-sm font-bold text-slate-400 mb-1">
+                      No customers registered yet.
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => router.push("/users/new")}
+                      className="rounded-lg"
+                    >
+                      Be the first to create one
+                    </Button>
                   </div>
                 </TableCell>
               </TableRow>

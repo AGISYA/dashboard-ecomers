@@ -54,7 +54,13 @@ export async function POST(req: NextRequest) {
     const phone = String(body.phone ?? "").trim();
     const email = String(body.email ?? "").trim();
     const requestedRole = (body.role ?? "USER") as "USER" | "ADMIN" | "SUPER_ADMIN";
-    const role = bootstrapAdmin ? "SUPER_ADMIN" : requestedRole;
+    // ADMIN can only create USER; SUPER_ADMIN can create any role
+    const role =
+      bootstrapAdmin
+        ? "SUPER_ADMIN"
+        : me?.role === "ADMIN"
+          ? "USER"
+          : requestedRole;
     const active = body.active ?? true;
     const password = body.password ? String(body.password) : undefined;
     if (!name || (!phone && !email) || !["USER", "ADMIN", "SUPER_ADMIN"].includes(role)) {

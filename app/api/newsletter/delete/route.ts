@@ -16,7 +16,7 @@ export async function DELETE(req: NextRequest) {
     }
 
     try {
-        await (prisma as any).newsletterSubscription.delete({
+        await prisma.newsletterSubscription.delete({
             where: { id },
         });
         return NextResponse.json({ success: true });

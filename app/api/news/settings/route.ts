@@ -1,38 +1,54 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function GET() {
     try {
-        let s = await (prisma as any).newsSettings.findFirst();
-        if (!s) {
-            s = await (prisma as any).newsSettings.create({
-                data: {
-                    title: "News",
-                    buttonText: "See all news",
-                    buttonLink: "/blogs/news",
-                },
-            });
-        }
-        return NextResponse.json(s);
+        const s = await prisma.newsSettings.findFirst({
+            orderBy: { createdAt: "desc" },
+        });
+        return NextResponse.json(s || {
+            title: "News",
+            buttonText: "See all news",
+            buttonLink: "/blogs/news",
+        });
     } catch (e) {
-        return NextResponse.json({ error: String(e) }, { status: 500 });
+        return NextResponse.json({ error: "Gagal mengambil konfigurasi news" }, { status: 500 });
     }
 }
 
-export async function PUT(req: Request) {
+export async function PUT(req: NextRequest) {
+    const token = await getAdminAuthTokenFromCookies();
+    if (!token || !verifyJWT(token)) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     try {
         const body = await req.json();
-        let s = await (prisma as any).newsSettings.findFirst();
-        if (!s) {
-            s = await (prisma as any).newsSettings.create({ data: body });
+        const existing = await prisma.newsSettings.findFirst({
+            orderBy: { createdAt: "desc" },
+        });
+        let result;
+        if (!existing) {
+            result = await prisma.newsSettings.create({
+                data: {
+                    title: body.title ?? "News",
+                    buttonText: body.buttonText ?? "See all news",
+                    buttonLink: body.buttonLink ?? "/blogs/news",
+                },
+            });
         } else {
-            s = await (prisma as any).newsSettings.update({
-                where: { id: s.id },
-                data: body,
+            result = await prisma.newsSettings.update({
+                where: { id: existing.id },
+                data: {
+                    title: body.title ?? undefined,
+                    buttonText: body.buttonText ?? undefined,
+                    buttonLink: body.buttonLink ?? undefined,
+                },
             });
         }
-        return NextResponse.json(s);
+        return NextResponse.json(result);
     } catch (e) {
-        return NextResponse.json({ error: String(e) }, { status: 500 });
+        console.error("News Settings Put Error:", e);
+        return NextResponse.json({ error: "Gagal menyimpan konfigurasi news" }, { status: 500 });
     }
 }

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function GET(_: NextRequest) {
-  const links = await (prisma as any).footerLink.findMany({
+  const links = await prisma.footerLink.findMany({
     orderBy: { order: "asc" },
   });
   return NextResponse.json(links);
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       order?: number;
       active?: boolean;
     };
-    const newLink = await (prisma as any).footerLink.create({
+    const newLink = await prisma.footerLink.create({
       data: {
         group: body.group,
         label: body.label,

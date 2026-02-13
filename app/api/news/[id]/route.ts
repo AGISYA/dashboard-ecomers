@@ -8,7 +8,7 @@ type Ctx = { params: Promise<{ id: string }> };
 
 export async function GET(_: NextRequest, { params }: Ctx) {
   const { id } = await params;
-  const post = await (prisma as any).newsPost.findUnique({
+  const post = await prisma.newsPost.findUnique({
     where: { id },
   });
   if (!post) return NextResponse.json({ error: "Not found" }, { status: 404 });
@@ -37,7 +37,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
     };
 
     if (body.slug) {
-      const existing = await (prisma as any).newsPost.findFirst({
+      const existing = await prisma.newsPost.findFirst({
         where: {
           slug: body.slug,
           id: { not: id },
@@ -56,7 +56,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
       }
     }
 
-    const updatedPost = await (prisma as any).newsPost.update({
+    const updatedPost = await prisma.newsPost.update({
       where: { id },
       data: {
         title: body.title ?? undefined,
@@ -84,7 +84,7 @@ export async function DELETE(_: NextRequest, { params }: Ctx) {
   }
   const { id } = await params;
   try {
-    await (prisma as any).newsPost.delete({
+    await prisma.newsPost.delete({
       where: { id },
     });
     return NextResponse.json({ ok: true });

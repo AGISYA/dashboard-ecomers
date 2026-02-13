@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
@@ -78,11 +79,6 @@ const groups = [
         href: "/news",
       },
       {
-        label: "Newsletter",
-        icon: Mail,
-        href: "/newsletter",
-      },
-      {
         label: "Pengaturan Footer",
         icon: PanelBottom,
         href: "/footer",
@@ -93,12 +89,12 @@ const groups = [
     title: "Akses Pengguna",
     routes: [
       {
-        label: "Manajemen Admin",
+        label: "User Ecomers",
         icon: Users,
         href: "/users",
       },
       {
-        label: "Pengguna Toko",
+        label: "Admin",
         icon: UserCog,
         href: "/pengguna",
       },
@@ -113,11 +109,17 @@ export default function Sidebar() {
     <div className="flex flex-col h-full bg-white text-slate-900 border-r border-slate-100">
       <div className="px-6 py-8">
         <Link href="/dashboard" className="flex items-center gap-3 transition-opacity hover:opacity-80">
-          <div className="size-10 bg-slate-900 rounded-lg flex items-center justify-center font-semibold text-white shadow-lg shadow-slate-200 transform -rotate-1">
-            F
+          <div className="size-10 flex items-center justify-center">
+            <Image
+              src="/logotukangbikin.png"
+              alt="Logo Tukang Bikin"
+              width={60}
+              height={60}
+              className="object-contain"
+            />
           </div>
           <div className="flex flex-col">
-            <h1 className="text-lg font-semibold tracking-tight text-slate-900 leading-none">FURSIA</h1>
+            <h1 className="text-lg font-semibold tracking-tight text-slate-900 leading-none">tukang BIKIN</h1>
             <span className="text-[10px] font-medium text-slate-400 uppercase tracking-widest mt-1">Sistem Manajemen</span>
           </div>
         </Link>
@@ -160,7 +162,7 @@ export default function Sidebar() {
 
       <div className="p-6 border-t border-slate-100 bg-slate-50/30">
         <div className="flex flex-col gap-1.5 opacity-40">
-          <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">© 2026 FURSIA</p>
+          <p className="text-[10px] font-medium text-slate-500 uppercase tracking-widest">© 2026 TUKANG BIKIN</p>
           <p className="text-[9px] font-medium text-slate-500 flex items-center gap-2">
             <span className="size-1.5 rounded-full bg-slate-300" />
             V1.2.0 Build Stabil

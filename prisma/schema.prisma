@@ -77,7 +77,7 @@ model WhyItem {
 
 model WhySettings {
   id         String   @id @default(cuid())
-  title      String   @default("Why Choose FURSIA")
+  title      String   @default("Why Choose tukang BIKIN")
   buttonText String   @default("Complete the why")
   buttonLink String   @default("/about")
   createdAt  DateTime @default(now())

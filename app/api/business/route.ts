@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function GET(_: NextRequest) {
-  const row = await (prisma as any).businessPromo.findFirst({
+  const row = await prisma.businessPromo.findFirst({
     orderBy: { createdAt: "desc" },
   });
   return NextResponse.json(row || null);
@@ -27,12 +27,12 @@ export async function PUT(req: NextRequest) {
       active?: boolean;
     };
 
-    const existing = await (prisma as any).businessPromo.findFirst({
+    const existing = await prisma.businessPromo.findFirst({
       orderBy: { createdAt: "desc" },
     });
 
     if (!existing) {
-      const newItem = await (prisma as any).businessPromo.create({
+      const newItem = await prisma.businessPromo.create({
         data: {
           title: String(body.title ?? "Shop for Business"),
           description: String(body.description ?? ""),
@@ -44,7 +44,7 @@ export async function PUT(req: NextRequest) {
       });
       return NextResponse.json(newItem);
     } else {
-      const updatedItem = await (prisma as any).businessPromo.update({
+      const updatedItem = await prisma.businessPromo.update({
         where: { id: existing.id },
         data: {
           title: typeof body.title === "string" ? body.title : undefined,

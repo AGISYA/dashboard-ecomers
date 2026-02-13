@@ -2,6 +2,7 @@ export const runtime = "nodejs";
 
 import { NextResponse, type NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const body = (await req.json()) as { email?: string };
@@ -10,13 +11,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Email tidak valid" }, { status: 400 });
   }
   try {
-    const existing = await (prisma as any).newsletterSubscription.findUnique({
+    const existing = await prisma.newsletterSubscription.findUnique({
       where: { email },
     });
     if (existing) {
       return NextResponse.json({ error: "Email sudah terdaftar" }, { status: 409 });
     }
-    const newItem = await (prisma as any).newsletterSubscription.create({
+    const newItem = await prisma.newsletterSubscription.create({
       data: { email },
     });
     return NextResponse.json({ id: newItem.id });
@@ -27,8 +28,12 @@ export async function POST(req: NextRequest) {
 }
 
 export async function GET(req: NextRequest) {
+  const token = await getAdminAuthTokenFromCookies();
+  if (!token || !verifyJWT(token)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
-    const subs = await (prisma as any).newsletterSubscription.findMany({
+    const subs = await prisma.newsletterSubscription.findMany({
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(subs);

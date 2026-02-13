@@ -21,7 +21,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
       order?: number;
       active?: boolean;
     };
-    const updatedLink = await (prisma as any).footerLink.update({
+    const updatedLink = await prisma.footerLink.update({
       where: { id },
       data: {
         group: body.group ?? undefined,
@@ -46,7 +46,7 @@ export async function DELETE(_: NextRequest, { params }: Ctx) {
   }
   const { id } = await params;
   try {
-    await (prisma as any).footerLink.delete({
+    await prisma.footerLink.delete({
       where: { id },
     });
     return NextResponse.json({ ok: true });

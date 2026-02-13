@@ -94,7 +94,13 @@ export async function GET(req: Request) {
   return NextResponse.json({ data: result, page, limit, total });
 }
 
+import { getAdminAuthTokenFromCookies, verifyJWT } from "@/lib/auth";
+
 export async function POST(req: Request) {
+  const token = await getAdminAuthTokenFromCookies();
+  if (!token || !verifyJWT(token)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
   try {
     const body = (await req.json()) as {
       name?: string;
@@ -135,7 +141,8 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ id: created.id });
-  } catch {
-    return NextResponse.json({ error: "Terjadi kesalahan" }, { status: 500 });
+  } catch (err) {
+    console.error("Product Post Error:", err);
+    return NextResponse.json({ error: "Gagal membuat produk" }, { status: 500 });
   }
 }
